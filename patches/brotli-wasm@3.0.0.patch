@@ -1,0 +1,31 @@
+diff --git a/package.json b/package.json
+index 6f1c536fb82c7bfa3bdd578910a96e70a40a279e..7a2452517245e0c83131cbcb912e083498ebf12e 100644
+--- a/package.json
++++ b/package.json
+@@ -12,7 +12,8 @@
+       "browser": "./index.browser.js",
+       "require": "./index.node.js",
+       "default": "./index.web.js"
+-    }
++    },
++    "./pkg.web/brotli_wasm": "./pkg.web/brotli_wasm.js"
+   },
+   "sideEffects": false,
+   "files": [
+diff --git a/pkg.web/brotli_wasm.js b/pkg.web/brotli_wasm.js
+index 1e84313d9c680092350db4a3645be76f5edcc8eb..9f417fff91fe02b6cea6aa16349c436fe7dd63bb 100644
+--- a/pkg.web/brotli_wasm.js
++++ b/pkg.web/brotli_wasm.js
+@@ -426,9 +426,9 @@ async function load(module, imports) {
+ }
+ 
+ async function init(input) {
+-    if (typeof input === 'undefined') {
+-        input = new URL('brotli_wasm_bg.wasm', import.meta.url);
+-    }
++    // if (typeof input === 'undefined') {
++    //     input = new URL('brotli_wasm_bg.wasm', import.meta.url);
++    // }
+     const imports = {};
+     imports.wbg = {};
+     imports.wbg.__wbindgen_is_undefined = function(arg0) {
