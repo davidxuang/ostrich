@@ -1,3 +1,43 @@
+import { GM_xmlhttpRequest, GmXhrRequest } from '$';
+
+type ResponseTypes = keyof {
+  text: string;
+  json: any;
+  arraybuffer: ArrayBuffer;
+  blob: Blob;
+  document: Document;
+  stream: ReadableStream<Uint8Array>;
+};
+
+function xmlHttpRequest<TContext, TResponse extends ResponseTypes = 'text'>(
+  details: GmXhrRequest<TContext, TResponse>,
+) {
+  return new Promise<
+    Parameters<
+      Exclude<GmXhrRequest<TContext, TResponse>['onload'], undefined>
+    >[0]
+  >((resolve, reject) => {
+    GM_xmlhttpRequest<TContext, TResponse>({
+      ...details,
+      onabort() {
+        reject('Aborted');
+      },
+      onload(event) {
+        if (event.status !== 200) {
+          reject(event.statusText);
+        }
+        resolve(event);
+      },
+      onerror(event) {
+        reject(event);
+      },
+      ontimeout() {
+        reject('Timeout');
+      },
+    });
+  });
+}
+
 function parseHeaders(value: string) {
   return Object.fromEntries(
     value.split('\r\n').map((line) => {
@@ -7,10 +47,22 @@ function parseHeaders(value: string) {
   );
 }
 
-function unescape(value: string) {
+function unescapeHtml(value: string) {
   const textarea = document.createElement('textarea');
   textarea.innerHTML = value;
   return textarea.value;
+}
+
+function toDataTransfer(file: File | File[]) {
+  const data = new DataTransfer();
+  if (file instanceof Array) {
+    file.forEach((f) => {
+      data.items.add(f);
+    });
+  } else {
+    data.items.add(file);
+  }
+  return data;
 }
 
 async function changed(
@@ -89,9 +141,11 @@ function trySelect(select: HTMLSelectElement, name: string) {
   return seq.length === 1 && (select.value = seq.at(0)!.key);
 }
 
-export default {
+export {
+  xmlHttpRequest,
   parseHeaders,
-  unescape,
+  unescapeHtml,
+  toDataTransfer,
   changed,
   trySelect,
 };

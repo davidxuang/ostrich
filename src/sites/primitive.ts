@@ -108,7 +108,7 @@ const frameworks = {
   },
 };
 
-function getFullSites(frameworks: { [fw: string]: Framework }) {
+function transformSites(frameworks: { [fw: string]: Framework }) {
   return Object.entries(frameworks).flatMap(([fw, framework]) =>
     Object.entries(framework.sites).map(
       ([st, site]): [string, string, Site] => [
@@ -131,4 +131,4 @@ function getFullSites(frameworks: { [fw: string]: Framework }) {
 }
 
 export default frameworks;
-export { getFullSites };
+export { transformSites };

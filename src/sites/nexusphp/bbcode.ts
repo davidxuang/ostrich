@@ -9,7 +9,7 @@ import bb, {
   ViewElement,
   View,
   ValueView,
-} from '../../bbcode';
+} from '../../common/bbcode';
 
 type NPVoid = VoidElement<'hr'>;
 type NPValueVoid = ValueVoidElement<'img'>;

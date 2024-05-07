@@ -1,7 +1,7 @@
 import typescript from 'rollup-plugin-typescript2';
 import { defineConfig } from 'vite';
 import monkey from 'vite-plugin-monkey';
-import frameworks, { getFullSites } from './src/vendor/primitive';
+import primitive, { transformSites } from './src/sites/primitive';
 
 export default defineConfig({
   build: {
@@ -20,13 +20,18 @@ export default defineConfig({
           'zh-CN': '适用于Gazelle等架构站点的音乐转种工具',
         },
         namespace: 'https://dvxg.de/',
-        match: getFullSites(frameworks).flatMap(([_fw, _st, site]) =>
-          Object.entries(site.matches).flatMap(([_cat, path]) =>
-            typeof path === 'string'
-              ? `${new URL(path, `https://*.${site.hostname}`)}*`
-              : path.map((p) => `${new URL(p, `https://*.${site.hostname}`)}*`),
+        match: [
+          'https://logs.musichoarders.xyz/*',
+          ...transformSites(primitive).flatMap(([_fw, _st, site]) =>
+            Object.entries(site.matches).flatMap(([_cat, path]) =>
+              typeof path === 'string'
+                ? `${new URL(path, `https://*.${site.hostname}`)}*`
+                : path.map(
+                    (p) => `${new URL(p, `https://*.${site.hostname}`)}*`,
+                  ),
+            ),
           ),
-        ),
+        ],
         resource: {
           brotli_wasm_bg:
             'https://cdn.jsdelivr.net/npm/brotli-wasm@3/pkg.web/brotli_wasm_bg.wasm',

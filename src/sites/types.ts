@@ -1,4 +1,16 @@
-import { BBNode } from '../bbcode';
+import { BBNode } from '../common/bbcode';
+
+type LogCollection =
+  | {
+      plain: string[];
+      encoded?: undefined;
+      recovered?: boolean;
+    }
+  | {
+      plain?: undefined;
+      encoded: string[]; // base64url
+      recovered?: undefined;
+    };
 
 type Record = {
   site: string;
@@ -28,7 +40,7 @@ type Record = {
     format: string;
     scene: boolean;
     uploaded_by: string;
-    logs: string[];
+    logs?: LogCollection;
   };
 };
 
@@ -37,7 +49,8 @@ interface Payload {
   record: Record;
   [key: string]: any;
 }
-type FromCallback = (container: JQuery, payload: Payload) => void;
+type ExtractCallback = (container: JQuery, payload: Payload) => Promise<void>;
+type AdaptCallback = (container: JQuery, selector: string) => Promise<void>;
 
 type PartialSite = {
   hostname: string;
@@ -46,8 +59,8 @@ type PartialSite = {
   actions?: { [action: string]: string };
   selects?: { [map: string]: { [key: string]: string } };
 
-  extract?: (site: [string, Site], callback: FromCallback) => Promise<void>;
-  adapt?: (payload: Payload) => Promise<void>;
+  extract?: (site: [string, Site], callback: ExtractCallback) => Promise<void>;
+  adapt?: (payload: Payload, callback: AdaptCallback) => Promise<void>;
 };
 type Site = PartialSite & {
   matches: Matches;
@@ -69,9 +82,11 @@ type Framework = {
 };
 
 export type {
+  AdaptCallback,
   Entries,
   Framework,
-  FromCallback,
+  ExtractCallback,
+  LogCollection,
   Matches,
   PartialSite,
   Payload,

@@ -1,5 +1,5 @@
 import typia, { createIs } from 'typia';
-import { _throw } from '../helper';
+import { _throw } from './throw';
 
 type Enumerate<
   N extends number,
@@ -235,7 +235,7 @@ function _fromHTML(
   const result: BBNode[] = [];
   while (++index < origin.length) {
     const n = origin[index];
-    if (n instanceof Text) {
+    if (n instanceof globalThis.Text) {
       let last = result.at(-1);
       if (raw) {
         result.push(new BBText(n.textContent ?? ''));

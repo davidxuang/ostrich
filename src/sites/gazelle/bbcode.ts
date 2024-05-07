@@ -1,4 +1,4 @@
-import bb, { BBNode } from '../../bbcode';
+import bb, { BBNode } from '../../common/bbcode';
 
 function _dump(n: BBNode, ordered = false): string {
   let tag: string = n['#'];

@@ -1,13 +1,13 @@
 import { PartialSite } from '../types';
-import { adaptUniversal, adaptJson, adaptLogs } from '.';
+import { adaptUniversal, adaptAuto, adaptLogs } from '.';
 import bbcode from './bbcode';
 
 export default function (site: PartialSite) {
-  site.adapt = async (payload) => {
+  site.adapt = async (payload, callback) => {
     const record = payload.record;
 
     if (payload['gazelle']) {
-      await adaptJson(payload['gazelle']);
+      await adaptAuto(payload['gazelle']);
 
       // avoid racing
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -21,8 +21,12 @@ export default function (site: PartialSite) {
       await adaptUniversal(payload.record);
     }
 
-    if (record.item.logs.length) {
-      adaptLogs(record.item.logs, record.group.name);
+    if (record.item.logs) {
+      await adaptLogs(record.item.logs, record.group.name);
+      await callback(
+        $('#upload_logs .label').append($('<br>')),
+        '#file[name^=logfiles]',
+      );
     }
   };
 }

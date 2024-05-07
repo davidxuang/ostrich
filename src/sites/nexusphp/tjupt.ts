@@ -1,5 +1,6 @@
-import { _throw } from '../../helper';
-import html from '../../io/html';
+import { changed } from '../../common/html';
+import log from '../../common/log';
+import { _throw } from '../../common/throw';
 import { PartialSite } from '../types';
 import bbcode from './bbcode';
 
@@ -12,7 +13,7 @@ export default function (site: PartialSite) {
     $(select_cat).trigger('change');
     const form_div = select_cat.nextElementSibling ?? _throw(select_cat);
     while (form_div.children.length <= 1)
-      await html.changed(
+      await changed(
         select_cat.nextElementSibling ?? _throw(select_cat),
         'childList',
       );
@@ -41,8 +42,11 @@ export default function (site: PartialSite) {
         : record.group.description,
       record.item.description,
       record.item.logs
-        .map((log) => `[hide=Log][code]${log}[/code][/hide]`)
-        .join('\n'),
+        ? log
+            .toString(record.item.logs)
+            .map((log) => `[hide=Log][code]${log}[/code][/hide]`)
+            .join('\n')
+        : undefined,
     ]
       .filter((i) => i)
       .join('\n[hr]\n');

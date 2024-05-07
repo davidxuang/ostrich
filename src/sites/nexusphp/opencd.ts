@@ -1,18 +1,24 @@
-import { _throw, xmlHttpRequest } from '../../helper';
-import file from '../../io/file';
-import html from '../../io/html';
+import {
+  changed,
+  parseHeaders,
+  toDataTransfer,
+  trySelect,
+  xmlHttpRequest,
+} from '../../common/html';
+import log from '../../common/log';
+import { _throw } from '../../common/throw';
 import { PartialSite } from '../types';
 import bbcode from './bbcode';
 
 export default function (site: PartialSite) {
-  site.adapt = async (payload) => {
+  site.adapt = async (payload, callback) => {
     const record = payload.record;
     const cover_task = xmlHttpRequest({
       method: 'GET',
       url: record.group.image,
       responseType: 'arraybuffer',
     }).then((event) => {
-      const transfer = file.toDataTransfer(
+      const transfer = toDataTransfer(
         new File(
           [event.response],
           new URL(event.finalUrl).pathname
@@ -21,9 +27,9 @@ export default function (site: PartialSite) {
             .at(-1)
             ?.substring(1) ?? _throw(event),
           {
-            type: html
-              .parseHeaders(event.responseHeaders)
-              ['content-type'].split(';')[0],
+            type: parseHeaders(event.responseHeaders)['content-type'].split(
+              ';',
+            )[0],
           },
         ),
       );
@@ -36,7 +42,7 @@ export default function (site: PartialSite) {
     // avoid risk
     const desc_parent = $('#editer_description').single();
     if (desc_parent.children.length === 0) {
-      await html.changed(desc_parent, 'childList');
+      await changed(desc_parent, 'childList');
     }
 
     $<HTMLSelectElement>('#browsecat').single().value = '408'; // Music cat
@@ -47,11 +53,8 @@ export default function (site: PartialSite) {
     year.value = record.group.year.toString();
     year.dispatchEvent(new Event('change'));
 
-    html.trySelect(
-      $<HTMLSelectElement>('#standard').single(),
-      record.item.format,
-    );
-    html.trySelect($<HTMLSelectElement>('#medium').single(), record.item.media);
+    trySelect($<HTMLSelectElement>('#standard').single(), record.item.format);
+    trySelect($<HTMLSelectElement>('#medium').single(), record.item.media);
 
     const repost_input = $<HTMLInputElement>('#boardid1').single();
     repost_input.checked = true;
@@ -66,14 +69,20 @@ export default function (site: PartialSite) {
       .filter((i) => i)
       .join(' / ');
 
-    const add_log_input = $<HTMLInputElement>('#nfoadd').single();
-    file.fromLogs(record.item.logs, record.group.name).forEach((f, i) => {
-      if (i > 0) {
-        add_log_input.click();
-      }
-      $<HTMLInputElement>(`[name=nfo${'1'.repeat(i + 1)}]`).single().files =
-        file.toDataTransfer(f).files;
-    });
+    if (record.item.logs) {
+      const log_add = $<HTMLInputElement>('#nfoadd').single();
+      log.toFile(record.item.logs, record.group.name).forEach(async (f, i) => {
+        if (i > 0) {
+          log_add.click();
+        }
+        $<HTMLInputElement>(`[name=nfo${'1'.repeat(i + 1)}]`).single().files =
+          toDataTransfer(f).files;
+      });
+    }
+    await callback(
+      $('.rowhead[msg^=NFO]').append($('<br>')),
+      'input[name^=nfo1]',
+    );
 
     $<HTMLTextAreaElement>('#descr').single().value = [
       record.group.description instanceof Object
