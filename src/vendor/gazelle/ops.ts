@@ -1,5 +1,5 @@
 import { PartialSite } from '../types';
-import { adaptGeneric, adaptJson, adaptLogs } from '.';
+import { adaptUniversal, adaptJson, adaptLogs } from '.';
 
 export default function (site: PartialSite) {
   site.adapt = async (payload) => {
@@ -8,7 +8,7 @@ export default function (site: PartialSite) {
     if (payload['gazelle']) {
       await adaptJson(payload['gazelle']);
     } else {
-      await adaptGeneric(payload.record);
+      await adaptUniversal(payload.record);
     }
 
     if (record.item.logs.length) {

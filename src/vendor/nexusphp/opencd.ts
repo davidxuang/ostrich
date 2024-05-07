@@ -33,7 +33,7 @@ export default function (site: PartialSite) {
         transfer.files;
     });
 
-    // race & risk
+    // avoid risk
     const desc_parent = $('#editer_description').single();
     if (desc_parent.children.length === 0) {
       await html.changed(desc_parent, 'childList');

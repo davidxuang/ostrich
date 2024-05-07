@@ -24,7 +24,7 @@ function xmlHttpRequest<TContext, TResponse extends ResponseTypes = 'text'>(
     GM_xmlhttpRequest<TContext, TResponse>({
       ...details,
       onabort() {
-        reject('aborted');
+        reject('Aborted');
       },
       onload(event) {
         if (event.status !== 200) {
@@ -36,7 +36,7 @@ function xmlHttpRequest<TContext, TResponse extends ResponseTypes = 'text'>(
         reject(event);
       },
       ontimeout() {
-        reject('timeout');
+        reject('Timeout');
       },
     });
   });

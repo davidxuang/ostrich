@@ -13,28 +13,35 @@ function unescape(value: string) {
   return textarea.value;
 }
 
-function changed(
+async function changed(
   node: Node,
   type: MutationRecordType,
-  timeout = 30000,
+  timeout?: number,
   sender?: HTMLElement,
 ) {
-  return Promise.race([
-    new Promise<never>((_, reject) => {
-      setTimeout(() => reject('Timeout'), timeout);
-    }),
-    new Promise<void>((resolve) => {
-      const observer = new MutationObserver((mutations) => {
-        if (mutations.some((m) => m.type === type)) {
-          observer.disconnect();
-          resolve();
-        }
-      });
+  try {
+    console.debug(
+      `Waiting for mutations with timeout of ${(timeout ??= 30000)}.`,
+    );
+    return await Promise.race([
+      new Promise<never>((_, reject) => {
+        setTimeout(() => reject('Timeout'), timeout);
+      }),
+      new Promise<void>((resolve) => {
+        const observer = new MutationObserver((mutations) => {
+          if (mutations.some((m) => m.type === type)) {
+            observer.disconnect();
+            resolve();
+          }
+        });
 
-      observer.observe(node, { [type]: true });
-      sender?.dispatchEvent(new Event('change'));
-    }),
-  ]);
+        observer.observe(node, { [type]: true });
+        sender?.dispatchEvent(new Event('change'));
+      }),
+    ]);
+  } catch (reason) {
+    console.warn(reason);
+  }
 }
 
 const _reSplit = /^((?:\p{L}|\p{P}|\s)+)\s+[（()]((?:\p{L}|\p{P}|\s)+)[)）]$/u;

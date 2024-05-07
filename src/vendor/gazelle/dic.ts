@@ -1,5 +1,5 @@
 import { PartialSite } from '../types';
-import { adaptGeneric as adaptUniversal, adaptJson, adaptLogs } from '.';
+import { adaptUniversal, adaptJson, adaptLogs } from '.';
 import bbcode from './bbcode';
 
 export default function (site: PartialSite) {
@@ -7,14 +7,16 @@ export default function (site: PartialSite) {
     const record = payload.record;
 
     if (payload['gazelle']) {
-      await adaptJson(payload['gazelle']).then((_event) => {
-        $<HTMLTextAreaElement>('#album_desc').single().value =
-          record.group.description instanceof Object
-            ? bbcode.dump(record.group.description)
-            : record.group.description;
-        $<HTMLTextAreaElement>('#release_desc').single().value =
-          record.item.description;
-      });
+      await adaptJson(payload['gazelle']);
+
+      // avoid racing
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      $<HTMLTextAreaElement>('#album_desc').single().value =
+        record.group.description instanceof Object
+          ? bbcode.dump(record.group.description)
+          : record.group.description;
+      $<HTMLTextAreaElement>('#release_desc').single().value =
+        record.item.description;
     } else {
       await adaptUniversal(payload.record);
     }

@@ -5,7 +5,7 @@ import {
   Artist,
   Group,
   TorrentResponse,
-  adaptGeneric,
+  adaptUniversal,
   adaptLogs,
   adaptReleaseType,
   getJson,
@@ -36,7 +36,7 @@ export default function (site: PartialSite) {
   site.adapt = async (payload) => {
     const record = payload.record;
 
-    await adaptGeneric(record);
+    await adaptUniversal(record);
     if (record.item.logs.length) {
       adaptLogs(record.item.logs, record.group.name);
     }

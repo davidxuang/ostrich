@@ -15,7 +15,6 @@ export default function (site: PartialSite) {
       await html.changed(
         select_cat.nextElementSibling ?? _throw(select_cat),
         'childList',
-        5000,
       );
 
     $<HTMLInputElement>('#hqname').single().value = record.group.name;

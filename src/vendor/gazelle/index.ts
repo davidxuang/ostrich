@@ -185,8 +185,9 @@ async function extract([st, site]: [string, Site], callback: FromCallback) {
           url: `${site.entries.download}?action=${
             site.actions?.log ?? 'viewlog'
           }&torrentid=${torrent_id}`,
+          responseType: 'document',
         }).then((event) => {
-          return $(event.responseXML?.body ?? _throw(event))
+          return $(event.response?.body)
             .find('pre')
             .map((_, pre) => pre.textContent)
             .toArray();
@@ -249,7 +250,12 @@ async function adaptJson(gazelle: string) {
     }),
   ).files;
 
-  await html.changed($('#dynamic_form').single(), 'childList', 500, json_input);
+  await html.changed(
+    $('#dynamic_form').single(),
+    'childList',
+    undefined,
+    json_input,
+  );
 }
 
 function adaptReleaseType(
@@ -269,7 +275,7 @@ function adaptReleaseType(
   select.value = mapped;
 }
 
-async function adaptGeneric(record: Record) {
+async function adaptUniversal(record: Record) {
   $<HTMLInputElement>('#title').single().value = record.group.name;
   $<HTMLInputElement>('#year').single().value = record.group.year.toString();
 
@@ -309,7 +315,7 @@ function adaptLogs(logs: string[], name: string) {
     file.toDataTransfer(file.fromLogs(logs, name)).files;
 }
 
-export { getJson, adaptJson, adaptReleaseType, adaptGeneric, adaptLogs };
+export { getJson, adaptJson, adaptReleaseType, adaptUniversal, adaptLogs };
 export type { Artist, Group, Torrent, TorrentResponse };
 export default function (framework: typeof meta.gazelle) {
   (

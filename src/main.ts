@@ -32,11 +32,13 @@ $.fn.extend({
 if (cat === 'source') {
   if (site.extract) {
     await site.extract([st, site], (container, payload) => {
+      console.debug(payload);
+
       const params = new URLSearchParams();
       Object.entries(payload).forEach(([k, v]) => {
         params.set(k, marshal(v));
       });
-      console.debug(payload);
+      const p = params.toString();
 
       vendor.sites
         .filter(
@@ -53,9 +55,7 @@ if (cat === 'source') {
             .attr('target', '_blank')
             .attr(
               'href',
-              `https://${site.hostname}${
-                site.entries.upload
-              }#ostrich?${params.toString()}`,
+              `https://${site.hostname}${site.entries.upload}#ostrich?${p}`,
             );
         });
     });
