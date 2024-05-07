@@ -29,4 +29,5 @@ export default function (site: PartialSite) {
       );
     }
   };
+  return true;
 }

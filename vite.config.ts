@@ -1,7 +1,7 @@
 import typescript from 'rollup-plugin-typescript2';
 import { defineConfig } from 'vite';
 import monkey from 'vite-plugin-monkey';
-import primitive, { transformSites } from './src/sites/primitive';
+import sites from './src/sites/data';
 
 export default defineConfig({
   build: {
@@ -21,14 +21,16 @@ export default defineConfig({
         },
         namespace: 'https://dvxg.de/',
         match: [
-          'https://logs.musichoarders.xyz/*',
-          ...transformSites(primitive).flatMap(([_fw, _st, site]) =>
-            Object.entries(site.matches).flatMap(([_cat, path]) =>
-              typeof path === 'string'
-                ? `${new URL(path, `https://*.${site.hostname}`)}*`
-                : path.map(
-                    (p) => `${new URL(p, `https://*.${site.hostname}`)}*`,
-                  ),
+          'https://logs.musichoarders.xyz/',
+          ...Object.entries(sites).flatMap(([_fw, framework]) =>
+            Object.entries(framework).flatMap(([_st, site]) =>
+              Object.entries(site.include).flatMap(([_cat, path]) =>
+                typeof path === 'string'
+                  ? `${new URL(path, `https://*.${site.hostname}`)}*`
+                  : path.map(
+                      (p) => `${new URL(p, `https://*.${site.hostname}`)}*`,
+                    ),
+              ),
             ),
           ),
         ],

@@ -1,0 +1,113 @@
+{
+  "base": {
+    "gazelle": {
+      "include": {
+        "source": [
+          "/torrents.php",
+          "/artist.php",
+          "/collages.php"
+        ],
+        "target": "/upload.php"
+      },
+      "exclude": {
+        "download": "/torrents.php"
+      },
+      "actions": {
+        "log": "viewlog"
+      }
+    },
+    "nexusphp": {
+      "include": {
+        "source": "/plugin_details.php",
+        "target": "/plugin_upload.php"
+      },
+      "exclude": {
+        "download": "/download.php"
+      }
+    }
+  },
+  "override": {
+    "gazelle": {
+      "DIC": {
+        "hostname": "dicmusic.com",
+        "selects": {
+          "releaseType": {
+            "1": "Album",
+            "3": "Soundtrack",
+            "5": "EP",
+            "6": "Anthology",
+            "7": "Compilation",
+            "9": "Single",
+            "11": "Live album",
+            "13": "Remix",
+            "14": "Bootleg",
+            "15": "Interview",
+            "16": "Mixtape",
+            "17": "Demo",
+            "18": "Concert recording",
+            "19": "DJ Mix",
+            "21": "Unknown"
+          }
+        }
+      },
+      "OPS": {
+        "hostname": "orpheus.network",
+        "selects": {
+          "releaseType": {
+            "1": "Album",
+            "3": "Soundtrack",
+            "5": "EP",
+            "6": "Anthology",
+            "7": "Compilation",
+            "9": "Single",
+            "11": "Live album",
+            "13": "Remix",
+            "14": "Bootleg",
+            "15": "Interview",
+            "16": "Mixtape",
+            "17": "DJ Mix",
+            "18": "Concert recording",
+            "21": "Unknown"
+          }
+        }
+      },
+      "Redacted": {
+        "hostname": "redacted.ch",
+        "selects": {
+          "releaseType": {
+            "1": "Album",
+            "3": "Soundtrack",
+            "5": "EP",
+            "6": "Anthology",
+            "7": "Compilation",
+            "9": "Single",
+            "11": "Live album",
+            "13": "Remix",
+            "14": "Bootleg",
+            "15": "Interview",
+            "16": "Mixtape",
+            "17": "Demo",
+            "18": "Concert Recording",
+            "19": "DJ Mix",
+            "21": "Unknown"
+          }
+        },
+        "actions": {
+          "log": "loglist"
+        }
+      }
+    },
+    "nexusphp": {
+      "OpenCD": {
+        "hostname": "open.cd"
+      },
+      "TJUPT": {
+        "hostname": "tjupt.org",
+        "include": {
+          "source": "/details.php",
+          "target": "/upload.php"
+        }
+      }
+    }
+  }
+}

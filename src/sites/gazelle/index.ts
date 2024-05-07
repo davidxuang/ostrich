@@ -10,7 +10,7 @@ import {
 } from '../../common/html';
 import log from '../../common/log';
 import { _throw } from '../../common/throw';
-import primitive from '../primitive';
+import sites from '../data';
 import {
   ExtractCallback,
   Record,
@@ -285,8 +285,8 @@ async function extract([st, site]: [string, Site], callback: ExtractCallback) {
           if (r.response.torrent.hasLog) {
             logs = await xmlHttpRequest({
               method: 'GET',
-              url: `${site.entries.download}?action=${
-                site.actions?.log ?? 'viewlog'
+              url: `${site.exclude.download}?action=${
+                site.actions?.log || _throw(site)
               }&torrentid=${torrent_id}`,
               responseType: 'document',
             }).then<LogCollection>(async (event) => {
@@ -433,24 +433,22 @@ async function adaptUniversal(record: Record) {
 function _adaptReleaseType(
   select: HTMLSelectElement,
   value: string,
-  source: keyof typeof primitive.gazelle.sites,
-  target: keyof typeof primitive.gazelle.sites,
+  source: keyof typeof sites.gazelle,
+  target: keyof typeof sites.gazelle,
 ) {
-  const name = Object.entries(
-    primitive.gazelle.sites[source].selects.releaseType,
-  )
+  const name = Object.entries(sites.gazelle[source].selects.releaseType)
     .find(([k, _v]) => k === value)?.[1]
     ?.toLowerCase();
   if (!name) return;
-  const mapped = Object.entries(
-    primitive.gazelle.sites[target].selects.releaseType,
-  ).find(([_, v]) => v.toLowerCase() === name)?.[0];
+  const mapped = Object.entries(sites.gazelle[target].selects.releaseType).find(
+    ([_, v]) => v.toLowerCase() === name,
+  )?.[0];
   if (mapped === undefined) return;
   select.value = mapped;
 }
 
 async function adaptGazelle(
-  site: keyof typeof primitive.gazelle.sites,
+  site: keyof typeof sites.gazelle,
   json_url: string,
 ) {
   const json: TorrentResponse = await _getJson(json_url, 'json');
@@ -481,7 +479,7 @@ async function adaptGazelle(
         _adaptArtistRole(role);
     });
 
-  if (typia.is<keyof typeof primitive.gazelle.sites>(site)) {
+  if (typia.is<keyof typeof sites.gazelle>(site)) {
     _adaptReleaseType(
       $<HTMLSelectElement>('#releasetype').single(),
       group.releaseType.toString(),
@@ -506,12 +504,9 @@ async function adaptLogs(logs: LogCollection, name: string) {
 
 export { adaptAuto, adaptUniversal, adaptGazelle, adaptLogs };
 export type { Artist, Group, Torrent, TorrentResponse };
-export default function (framework: typeof primitive.gazelle) {
+export default function (framework: typeof sites.gazelle) {
   (
-    Object.entries(framework.sites) as [
-      keyof typeof framework.sites,
-      PartialSite,
-    ][]
+    Object.entries(framework) as [keyof typeof framework, PartialSite][]
   ).forEach(([st, site]) => {
     site['extract'] = extract;
     switch (st) {

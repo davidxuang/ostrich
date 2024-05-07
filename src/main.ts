@@ -63,12 +63,13 @@ if (cat === 'validate') {
         });
         const p = params.toString();
 
-        sites
+        Object.entries(sites)
+          .flatMap(([_fw, framework]) => Object.entries(framework))
           .filter(
-            ([_fw, _st, site]) =>
+            ([_st, site]) =>
               site.adapt && !location.hostname.endsWith(site.hostname),
           )
-          .forEach(([_fw, st, site], s) => {
+          .forEach(([st, site], s) => {
             if (s !== 0) {
               container.append(document.createTextNode(' · '));
             }
@@ -78,7 +79,7 @@ if (cat === 'validate') {
               .attr('target', '_blank')
               .attr(
                 'href',
-                `https://${site.hostname}${site.entries.upload}#ostrich?${p}`,
+                `https://${site.hostname}${site.include.target}#ostrich?${p}`,
               );
           });
       });

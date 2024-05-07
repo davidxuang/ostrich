@@ -52,44 +52,49 @@ interface Payload {
 type ExtractCallback = (container: JQuery, payload: Payload) => Promise<void>;
 type AdaptCallback = (container: JQuery, selector: string) => Promise<void>;
 
-type PartialSite = {
+type SiteCore = {
   hostname: string;
-  matches?: Partial<Matches>;
-  entries?: Partial<Entries>;
-  actions?: { [action: string]: string };
   selects?: { [map: string]: { [key: string]: string } };
 
   extract?: (site: [string, Site], callback: ExtractCallback) => Promise<void>;
   adapt?: (payload: Payload, callback: AdaptCallback) => Promise<void>;
 };
-type Site = PartialSite & {
-  matches: Matches;
-  entries: Entries;
+
+type SiteInclues = {
+  source: string | string[];
+  target: string;
+};
+type SiteIncludeTypes = keyof SiteInclues;
+
+type SiteExclude = {
+  download: string;
 };
 
-type Matches = {
-  source: string | string[];
-  target: string | string[];
+type PartialSiteEntries = {
+  include?: Partial<SiteInclues>;
+  exclude?: Partial<SiteExclude>;
+  actions?: { [action: string]: string };
 };
-type Entries = {
-  download: string;
-  upload: string;
+type SiteEntries = {
+  include: SiteInclues;
+  exclude: SiteExclude;
+  actions?: { [action: string]: string };
 };
-type Framework = {
-  sites: { [site: string]: PartialSite };
-  matches: Matches;
-  entries: Entries;
-};
+
+type PartialSite = SiteCore & PartialSiteEntries;
+type Site = SiteCore & SiteEntries;
+
+type FrameworkMap = { [fw: string]: { [st: string]: Site } };
 
 export type {
-  AdaptCallback,
-  Entries,
-  Framework,
-  ExtractCallback,
   LogCollection,
-  Matches,
-  PartialSite,
-  Payload,
   Record,
+  Payload,
+  AdaptCallback,
+  ExtractCallback,
+  SiteEntries,
+  PartialSite,
   Site,
+  SiteIncludeTypes,
+  FrameworkMap,
 };
