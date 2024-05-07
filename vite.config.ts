@@ -16,9 +16,12 @@ export default defineConfig({
       entry: 'src/main.ts',
       userscript: {
         icon: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji/assets/Musical%20score/3D/musical_score_3d.png',
+        description: {
+          'zh-CN': '适用于Gazelle等架构站点的音乐转种工具',
+        },
         namespace: 'https://dvxg.de/',
-        match: getFullSites(frameworks).flatMap(([fw, st, site]) =>
-          Object.entries(site.matches).flatMap(([cat, path]) =>
+        match: getFullSites(frameworks).flatMap(([_fw, _st, site]) =>
+          Object.entries(site.matches).flatMap(([_cat, path]) =>
             typeof path === 'string'
               ? `${new URL(path, `https://*.${site.hostname}`)}*`
               : path.map((p) => `${new URL(p, `https://*.${site.hostname}`)}*`),
