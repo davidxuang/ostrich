@@ -4,23 +4,14 @@ import monkey from 'vite-plugin-monkey';
 import frameworks, { getFullSites } from './src/vendor/primitive';
 
 export default defineConfig({
+  build: {
+    target: 'es2020',
+  },
   plugins: [
     {
       enforce: 'pre',
       ...typescript(),
     },
-    (() => {
-      const reExt = /\.(?:js|cjs|mjs)$/;
-      const reBlk = /^[ \t]*\/\*(.*\n)*?[ \t]*\*\/[ \t]*\n/gm;
-      return {
-        name: 'strip-block-comments',
-        transform(code, id, _options) {
-          return {
-            code: id.match(reExt) ? code.replace(reBlk, '') : code,
-          };
-        },
-      };
-    })(),
     monkey({
       entry: 'src/main.ts',
       userscript: {
@@ -39,21 +30,30 @@ export default defineConfig({
         },
       },
     }),
-    {
-      name: '',
-      enforce: 'post',
-      generateBundle(_options, bundle, _isWrite) {
-        Object.entries(bundle).forEach(([f, file]) => {
-          if (
-            typeof file['code'] === 'string' &&
-            file.fileName.endsWith('.user.js')
-          ) {
-            console.debug(file['code'].length);
-            file['code'] = file['code'].replace('__import__', 'import');
-            console.debug(file['code'].length);
-          }
-        });
-      },
-    },
+    (() => {
+      const reExt = /\.(?:js|cjs|mjs)$/;
+      const reBlk = /^[ \t]*\/\*(.*\n)*?[ \t]*\*\/[ \t]*\n/gm;
+      return {
+        name: 'hack',
+        enforce: 'post',
+        // strip brotli-wasm comments
+        transform(code, id, _options) {
+          return {
+            code: id.match(reExt) ? code.replace(reBlk, '') : code,
+          };
+        },
+        // magic __import__
+        generateBundle(_options, bundle, _isWrite) {
+          Object.entries(bundle).forEach(([f, file]) => {
+            if (
+              typeof file['code'] === 'string' &&
+              file.fileName.endsWith('.user.js')
+            ) {
+              file['code'] = file['code'].replace('__import__', 'import');
+            }
+          });
+        },
+      };
+    })(),
   ],
 });
