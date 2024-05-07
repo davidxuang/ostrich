@@ -18,17 +18,17 @@ interface INode {
   $$?: INode[];
 }
 
-class Singleton<T extends string> implements INode {
+class VoidElement<T extends string> implements INode {
   '#': T;
   constructor(tag: T) {
     this['#'] = tag;
   }
 }
-function singleton<T extends string>(tag: T) {
-  return () => new Singleton(tag);
+function Void<T extends string>(tag: T) {
+  return () => new VoidElement(tag);
 }
 
-class ValueSingleton<T extends string, V extends string | number = string>
+class ValueVoidElement<T extends string, V extends string | number = string>
   implements INode
 {
   '#': T;
@@ -38,13 +38,13 @@ class ValueSingleton<T extends string, V extends string | number = string>
     this.$ = value;
   }
 }
-function valueSingleton<T extends string, V extends string | number = string>(
+function ValueVoid<T extends string, V extends string | number = string>(
   tag: T,
 ) {
-  return (value: V) => new ValueSingleton(tag, value);
+  return (value: V) => new ValueVoidElement(tag, value);
 }
 
-class View<T extends string, C extends INode = BBNode> implements INode {
+class ViewElement<T extends string, C extends INode = BBNode> implements INode {
   '#': T;
   $$: C[];
   constructor(tag: T, children: C[]) {
@@ -52,11 +52,11 @@ class View<T extends string, C extends INode = BBNode> implements INode {
     this.$$ = children;
   }
 }
-function view<T extends string, C extends INode = BBNode>(tag: T) {
-  return (children: C[]) => new View(tag, children);
+function View<T extends string, C extends INode = BBNode>(tag: T) {
+  return (children: C[]) => new ViewElement(tag, children);
 }
 
-class ValueView<
+class ValueViewElement<
   T extends string,
   V extends string | number = string,
   C extends INode = BBNode,
@@ -70,40 +70,41 @@ class ValueView<
     this.$ = value;
   }
 }
-function valueView<
+function ValueView<
   T extends string,
   V extends string | number = string,
   C extends INode = BBNode,
 >(tag: T) {
-  return (value: V, children: C[]) => new ValueView(tag, value, children);
+  return (value: V, children: C[]) =>
+    new ValueViewElement(tag, value, children);
 }
 
 type Factory<T> = (...args: any) => T;
 
 // inline
-interface Bold extends View<'b'> {}
-const Bold = view('b') satisfies Factory<Bold>;
-interface Italic extends View<'i'> {}
-const Italic = view('i') satisfies Factory<Italic>;
-interface Underline extends View<'u'> {}
-const Underline = view('u') satisfies Factory<Underline>;
-interface Strikethrough extends View<'s'> {}
-const Strikethrough = view('s') satisfies Factory<Strikethrough>;
-interface Font extends ValueView<'font'> {}
-const Font = valueView('font') satisfies Factory<Font>;
-interface Size extends ValueView<'size', Integer<1, 8>> {}
-const Size = valueView('size') satisfies Factory<Size>;
-interface Color extends ValueView<'color'> {}
-const Color = valueView('color') satisfies Factory<Color>;
-interface Heading extends ValueView<'h', Integer<1, 7>> {}
-const Heading = valueView('h') satisfies Factory<Heading>;
-interface Sub extends View<'sub'> {}
-const Sub = view('sub') satisfies Factory<Sub>;
-interface Sup extends View<'sup'> {}
-const Sup = view('sup') satisfies Factory<Sup>;
-interface Anchor extends ValueView<'url'> {}
-const Anchor = valueView('url') satisfies Factory<Anchor>;
-class ImageElement extends ValueSingleton<'img'> {
+interface Bold extends ViewElement<'b'> {}
+const Bold = View('b') satisfies Factory<Bold>;
+interface Italic extends ViewElement<'i'> {}
+const Italic = View('i') satisfies Factory<Italic>;
+interface Underline extends ViewElement<'u'> {}
+const Underline = View('u') satisfies Factory<Underline>;
+interface Strikethrough extends ViewElement<'s'> {}
+const Strikethrough = View('s') satisfies Factory<Strikethrough>;
+interface Font extends ValueViewElement<'font'> {}
+const Font = ValueView('font') satisfies Factory<Font>;
+interface Size extends ValueViewElement<'size', Integer<1, 8>> {}
+const Size = ValueView('size') satisfies Factory<Size>;
+interface Color extends ValueViewElement<'color'> {}
+const Color = ValueView('color') satisfies Factory<Color>;
+interface Heading extends ValueViewElement<'h', Integer<1, 7>> {}
+const Heading = ValueView('h') satisfies Factory<Heading>;
+interface Sub extends ViewElement<'sub'> {}
+const Sub = View('sub') satisfies Factory<Sub>;
+interface Sup extends ViewElement<'sup'> {}
+const Sup = View('sup') satisfies Factory<Sup>;
+interface Anchor extends ValueViewElement<'url'> {}
+const Anchor = ValueView('url') satisfies Factory<Anchor>;
+class ImageElement extends ValueVoidElement<'img'> {
   alt?: string;
   constructor(value: string, alt?: string) {
     super('img', value);
@@ -112,35 +113,36 @@ class ImageElement extends ValueSingleton<'img'> {
 }
 const Image: Factory<ImageElement> = (value: string, alt?: string) =>
   new ImageElement(value, alt);
-interface Code extends View<'code'> {}
-const Code = view('code') satisfies Factory<Code>;
-interface Spoiler extends View<'#spoiler'> {}
-const Spoiler = view('#spoiler') satisfies Factory<Spoiler>;
+interface Code extends ViewElement<'code'> {}
+const Code = View('code') satisfies Factory<Code>;
+interface Spoiler extends ViewElement<'#spoiler'> {}
+const Spoiler = View('#spoiler') satisfies Factory<Spoiler>;
 // block
-interface HorizontalRule extends Singleton<'hr'> {}
-const HorizontalRule = singleton('hr') satisfies Factory<HorizontalRule>;
-interface Align extends ValueView<'align', 'left' | 'center' | 'right'> {}
-const Align = valueView('align') satisfies Factory<Align>;
-interface Quote extends ValueView<'quote'> {}
-const Quote = valueView('quote') satisfies Factory<Quote>;
-interface Pre extends ValueView<'pre'> {}
-const Pre = valueView('pre') satisfies Factory<Pre>;
-interface Collapse extends ValueView<'#collapse'> {}
-const Collapse = valueView('#collapse') satisfies Factory<Collapse>;
+interface HorizontalRule extends VoidElement<'hr'> {}
+const HorizontalRule = Void('hr') satisfies Factory<HorizontalRule>;
+interface Align
+  extends ValueViewElement<'align', 'left' | 'center' | 'right'> {}
+const Align = ValueView('align') satisfies Factory<Align>;
+interface Quote extends ValueViewElement<'quote'> {}
+const Quote = ValueView('quote') satisfies Factory<Quote>;
+interface Pre extends ValueViewElement<'pre'> {}
+const Pre = ValueView('pre') satisfies Factory<Pre>;
+interface Collapse extends ValueViewElement<'#collapse'> {}
+const Collapse = ValueView('#collapse') satisfies Factory<Collapse>;
 // list
-interface ListItem extends View<'li'> {}
-const ListItem = view('li') satisfies Factory<ListItem>;
-interface UList extends View<'ul', ListItem> {}
-const UList = view('ul') satisfies Factory<UList>;
-interface OList extends View<'ol', ListItem> {}
-const OList = view('ol') satisfies Factory<OList>;
+interface ListItem extends ViewElement<'li'> {}
+const ListItem = View('li') satisfies Factory<ListItem>;
+interface UList extends ViewElement<'ul', ListItem> {}
+const UList = View('ul') satisfies Factory<UList>;
+interface OList extends ViewElement<'ol', ListItem> {}
+const OList = View('ol') satisfies Factory<OList>;
 // table
-interface Table extends View<'table', TableRow> {}
-const Table = view('table') satisfies Factory<Table>;
-interface TableRow extends View<'tr', TableCell> {}
-const TableRow = view('tr') satisfies Factory<TableRow>;
-interface TableCell extends View<'td'> {}
-const TableCell = view('td') satisfies Factory<TableCell>;
+interface Table extends ViewElement<'table', TableRow> {}
+const Table = View('table') satisfies Factory<Table>;
+interface TableRow extends ViewElement<'tr', TableCell> {}
+const TableRow = View('tr') satisfies Factory<TableRow>;
+interface TableCell extends ViewElement<'td'> {}
+const TableCell = View('td') satisfies Factory<TableCell>;
 
 type BBElement =
   | Bold
@@ -169,22 +171,21 @@ type BBElement =
   | TableRow
   | TableCell;
 
-type BBValueView = Extract<BBElement, ValueView<any>>;
-type BBView = Exclude<Extract<BBElement, View<any>>, BBValueView>;
-type BBValueSingleton = Exclude<
-  Extract<BBElement, ValueSingleton<any>>,
+type BBValueView = Extract<BBElement, ValueViewElement<any>>;
+type BBView = Exclude<Extract<BBElement, ViewElement<any>>, BBValueView>;
+type BBValueVoid = Exclude<
+  Extract<BBElement, ValueVoidElement<any>>,
   BBValueView
 >;
-type BBSingleton = Exclude<
-  Extract<BBElement, Singleton<any>>,
-  BBValueView | BBView | BBValueSingleton
+type BBVoid = Exclude<
+  Extract<BBElement, VoidElement<any>>,
+  BBValueView | BBView | BBValueVoid
 >;
 
 const is = {
-  singleton: (node: BBNode): node is BBSingleton =>
-    createIs<BBSingleton['#']>()(node['#']),
-  valueSingleton: (node: BBNode): node is BBValueSingleton =>
-    createIs<BBValueSingleton['#']>()(node['#']),
+  void: (node: BBNode): node is BBVoid => createIs<BBVoid['#']>()(node['#']),
+  valueVoid: (node: BBNode): node is BBValueVoid =>
+    createIs<BBValueVoid['#']>()(node['#']),
   view: (node: BBNode): node is BBView => createIs<BBView['#']>()(node['#']),
   valueView: (node: BBNode): node is BBValueView =>
     createIs<BBValueView['#']>()(node['#']),
@@ -197,7 +198,7 @@ class BBText implements INode {
     this.$ = value;
   }
 }
-const text = (value: string) => new BBText(value);
+const Text = (value: string) => new BBText(value);
 type BBNode = BBElement | BBText;
 
 function _clamp(value: number, min: number, max: number) {
@@ -580,24 +581,20 @@ export type {
   ImageElement,
   INode,
   BBNode,
-  BBElement,
-  BBSingleton,
   BBText,
-  BBValueSingleton,
+  BBElement,
+  VoidElement,
+  BBVoid,
+  ValueVoidElement,
+  BBValueVoid,
+  ViewElement,
   BBView,
+  ValueViewElement,
   BBValueView,
   Integer,
-  Singleton,
-  ValueSingleton,
-  ValueView,
-  View,
 };
+export { Text, Void, ValueVoid, View, ValueView };
 export default {
   fromHTML,
-  text,
-  singleton,
-  valueSingleton,
-  view,
-  valueView,
   is,
 };

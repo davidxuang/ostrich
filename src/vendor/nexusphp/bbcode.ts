@@ -3,15 +3,17 @@ import bb, {
   BBNode,
   BBText,
   Integer,
-  Singleton,
-  ValueSingleton,
-  ValueView,
+  VoidElement,
+  ValueVoidElement,
+  ValueViewElement,
+  ViewElement,
   View,
+  ValueView,
 } from '../../bbcode';
 
-type NPSingleton = Singleton<'hr'>;
-type NPValueSingleton = ValueSingleton<'img'>;
-type NPView = View<
+type NPVoid = VoidElement<'hr'>;
+type NPValueVoid = ValueVoidElement<'img'>;
+type NPView = ViewElement<
   | 'b'
   | 'i'
   | 'u'
@@ -27,16 +29,18 @@ type NPView = View<
   | 'td'
 >;
 type NPValueView =
-  | ValueView<'color' | 'font' | 'url' | 'quote' | 'hide' | 'code', string>
-  | ValueView<'size', Integer<1, 8>>;
+  | ValueViewElement<
+      'color' | 'font' | 'url' | 'quote' | 'hide' | 'code',
+      string
+    >
+  | ValueViewElement<'size', Integer<1, 8>>;
 
-type NPNode = BBText | NPSingleton | NPValueSingleton | NPView | NPValueView;
+type NPNode = BBText | NPVoid | NPValueVoid | NPView | NPValueView;
 
 const _is = {
-  singleton: (node: NPNode): node is NPSingleton =>
-    createIs<NPSingleton['#']>()(node['#']),
-  valueSingleton: (node: NPNode): node is NPValueSingleton =>
-    createIs<NPValueSingleton['#']>()(node['#']),
+  void: (node: NPNode): node is NPVoid => createIs<NPVoid['#']>()(node['#']),
+  valueVoid: (node: NPNode): node is NPValueVoid =>
+    createIs<NPValueVoid['#']>()(node['#']),
   view: (node: NPNode): node is NPView => createIs<NPView['#']>()(node['#']),
   valueView: (node: NPNode): node is NPValueView =>
     createIs<NPValueView['#']>()(node['#']),
@@ -46,17 +50,17 @@ function _dump(n: BBNode, depth = -1): string {
   let np: NPNode | string = (() => {
     switch (n['#']) {
       case 'h':
-        return bb.valueView<'size', Integer<1, 8>>('size')(
+        return ValueView<'size', Integer<1, 8>>('size')(
           (8 - n.$) as Integer<2, 8>,
           n.$$,
         );
       case 'code':
-        return bb.valueView('font')('monospace', n.$$);
+        return ValueView('font')('monospace', n.$$);
       case '#spoiler':
         return { ...n, '#': 'mask' };
       case 'align':
         if (n.$ === 'center') {
-          return bb.view('center')(n.$$);
+          return View('center')(n.$$);
         } else {
           console.warn(n);
           return n.$$.map((c) => _dump(c, depth)).join('');
@@ -97,9 +101,9 @@ function _dump(n: BBNode, depth = -1): string {
       return `[${np['#']}]${np.$$.map((n) => _dump(n)).join('')}`;
   }
 
-  if (_is.singleton(np)) {
+  if (_is.void(np)) {
     return `[${n['#']}]`;
-  } else if (_is.valueSingleton(np)) {
+  } else if (_is.valueVoid(np)) {
     return `[${np['#']}=${np.$}]`;
   } else if (_is.view(np)) {
     return `[${np['#']}]${np.$$.map((n) => _dump(n)).join('')}[/${n['#']}]`;

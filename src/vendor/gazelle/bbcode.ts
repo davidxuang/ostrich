@@ -1,4 +1,4 @@
-import bb, { BBNode, BBValueSingleton } from '../../bbcode';
+import bb, { BBNode } from '../../bbcode';
 
 function _dump(n: BBNode, ordered = false): string {
   let tag: string = n['#'];
@@ -23,12 +23,11 @@ function _dump(n: BBNode, ordered = false): string {
       break;
   }
 
-  n satisfies Exclude<BBNode, BBValueSingleton>;
-
-  if (bb.is.singleton(n)) {
+  if (bb.is.void(n)) {
     return `[${tag}]`;
-    // } else if (bb.isElement.valueSingleton(n)) {
-    //   return `[${tag}=${n.$}]`;
+  } else if (bb.is.valueVoid(n)) {
+    n satisfies never;
+    return `[${tag}=${n['$']}]`;
   } else if (bb.is.view(n)) {
     return `[${tag}]${n.$$.map((x) => _dump(x)).join('')}[/${tag}]`;
   } else if (bb.is.valueView(n)) {
