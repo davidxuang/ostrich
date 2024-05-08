@@ -1,5 +1,5 @@
 import {
-  changed,
+  nextMutation,
   parseHeaders,
   toDataTransfer,
   trySelect,
@@ -11,7 +11,14 @@ import { PartialSite } from '../types';
 import bbcode from './bbcode';
 
 export default function (site: PartialSite) {
-  site.adapt = async (payload, callback) => {
+  site.validate = async (callback) => {
+    await callback(
+      $('.rowhead[msg^=NFO]').append($('<br>')),
+      'input[name^=nfo1]',
+    );
+  };
+
+  site.adapt = async (payload) => {
     const record = payload.record;
     const cover_task = xmlHttpRequest({
       method: 'GET',
@@ -42,7 +49,7 @@ export default function (site: PartialSite) {
     // avoid risk
     const desc_parent = $('#editer_description').single();
     if (desc_parent.children.length === 0) {
-      await changed(desc_parent, 'childList');
+      await nextMutation(desc_parent, 'childList');
     }
 
     $<HTMLSelectElement>('#browsecat').single().value = '408'; // Music cat
@@ -79,10 +86,6 @@ export default function (site: PartialSite) {
           toDataTransfer(f).files;
       });
     }
-    await callback(
-      $('.rowhead[msg^=NFO]').append($('<br>')),
-      'input[name^=nfo1]',
-    );
 
     $<HTMLTextAreaElement>('#descr').single().value = [
       record.group.description instanceof Object

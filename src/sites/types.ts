@@ -50,14 +50,15 @@ interface Payload {
   [key: string]: any;
 }
 type ExtractCallback = (container: JQuery, payload: Payload) => Promise<void>;
-type AdaptCallback = (container: JQuery, selector: string) => Promise<void>;
+type ValidateCallback = (container: JQuery, selector: string) => Promise<void>;
 
 type SiteCore = {
   hostname: string;
   selects?: { [map: string]: { [key: string]: string } };
 
   extract?: (site: [string, Site], callback: ExtractCallback) => Promise<void>;
-  adapt?: (payload: Payload, callback: AdaptCallback) => Promise<void>;
+  validate?: (callback: ValidateCallback) => Promise<void>;
+  adapt?: (payload: Payload) => Promise<void>;
 };
 
 type SiteInclues = {
@@ -90,7 +91,7 @@ export type {
   LogCollection,
   Record,
   Payload,
-  AdaptCallback,
+  ValidateCallback,
   ExtractCallback,
   SiteEntries,
   PartialSite,

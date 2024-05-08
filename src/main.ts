@@ -90,6 +90,29 @@ if (cat === 'validate') {
       location.origin,
     );
 
+    if (site.validate) {
+      await site.validate(async (container, selector) => {
+        const anchor = $('<a>')
+          .appendTo(container)
+          .text('Validate')
+          .attr('href', '#_ostrich');
+        anchor.on('click', async () => {
+          await Promise.all(
+            $<HTMLInputElement>(selector)
+              .toArray()
+              .filter((input) => input.files)
+              .flatMap((input) => [...input.files!])
+              .map(async (file) => {
+                window.open(
+                  `https://logs.musichoarders.xyz#ostrich#${base64url.encodeBytes(new Uint8Array(await file.arrayBuffer()))}`,
+                  '_blank',
+                );
+              }),
+          );
+        });
+      });
+    }
+
     if (psuedo_url.pathname === '/ostrich') {
       const payload = Object.fromEntries(
         [...psuedo_url.searchParams.entries()].map(([k, v]) => [
@@ -115,26 +138,7 @@ if (cat === 'validate') {
       });
 
       if (site.adapt) {
-        await site.adapt(payload, async (container, selector) => {
-          const anchor = $('<a>')
-            .appendTo(container)
-            .text('Validate')
-            .attr('href', '#');
-          anchor.on('click', async () => {
-            await Promise.all(
-              $<HTMLInputElement>(selector)
-                .toArray()
-                .filter((input) => input.files)
-                .flatMap((input) => [...input.files!])
-                .map(async (file) => {
-                  window.open(
-                    `https://logs.musichoarders.xyz#ostrich#${base64url.encodeBytes(new Uint8Array(await file.arrayBuffer()))}`,
-                    '_blank',
-                  );
-                }),
-            );
-          });
-        });
+        await site.adapt(payload);
 
         switch (fw) {
           case 'gazelle':

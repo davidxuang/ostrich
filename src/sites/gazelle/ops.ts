@@ -2,7 +2,7 @@ import { PartialSite } from '../types';
 import { adaptUniversal, adaptAuto, adaptLogs } from '.';
 
 export default function (site: PartialSite) {
-  site.adapt = async (payload, callback) => {
+  site.adapt = async (payload) => {
     const record = payload.record;
 
     if (payload['gazelle']) {
@@ -13,10 +13,6 @@ export default function (site: PartialSite) {
 
     if (record.item.logs) {
       await adaptLogs(record.item.logs, record.group.name);
-      await callback(
-        $('#upload_logs .label').append($('<br>')),
-        '#file[name^=logfiles]',
-      );
     }
   };
 }

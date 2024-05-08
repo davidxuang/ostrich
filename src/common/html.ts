@@ -47,12 +47,6 @@ function parseHeaders(value: string) {
   );
 }
 
-function unescapeHtml(value: string) {
-  const textarea = document.createElement('textarea');
-  textarea.innerHTML = value;
-  return textarea.value;
-}
-
 function toDataTransfer(file: File | File[]) {
   const data = new DataTransfer();
   if (file instanceof Array) {
@@ -65,9 +59,16 @@ function toDataTransfer(file: File | File[]) {
   return data;
 }
 
-async function changed(
-  node: Node,
+function unescapeHtml(value: string) {
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = value;
+  return textarea.value;
+}
+
+async function nextMutation(
+  target: Node,
   type: MutationRecordType,
+  subtree?: boolean,
   timeout?: number,
   sender?: HTMLElement,
 ) {
@@ -87,13 +88,26 @@ async function changed(
           }
         });
 
-        observer.observe(node, { [type]: true });
+        observer.observe(target, { [type]: true, subtree: subtree });
         sender?.dispatchEvent(new Event('change'));
       }),
     ]);
   } catch (reason) {
     console.warn(reason);
   }
+}
+
+function onDescendantAdded(
+  target: Node,
+  subtree: boolean,
+  callback: (descendant: Node) => void,
+) {
+  new MutationObserver((mutations) => {
+    mutations
+      .filter((m) => m.type === 'childList' && m.addedNodes.length)
+      .flatMap((m) => [...m.addedNodes])
+      .forEach(callback);
+  }).observe(target, { childList: true, subtree: subtree });
 }
 
 const _reSplit = /^((?:\p{L}|\p{P}|\s)+)\s+[（()]((?:\p{L}|\p{P}|\s)+)[)）]$/u;
@@ -144,8 +158,9 @@ function trySelect(select: HTMLSelectElement, name: string) {
 export {
   xmlHttpRequest,
   parseHeaders,
-  unescapeHtml,
   toDataTransfer,
-  changed,
+  unescapeHtml,
+  nextMutation,
+  onDescendantAdded,
   trySelect,
 };

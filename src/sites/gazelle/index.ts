@@ -2,11 +2,12 @@ import typia from 'typia';
 import base64url from '../../common/base64url';
 import bb from '../../common/bbcode';
 import {
-  changed,
+  nextMutation,
   toDataTransfer,
   trySelect,
   unescapeHtml,
   xmlHttpRequest,
+  onDescendantAdded,
 } from '../../common/html';
 import log from '../../common/log';
 import { _throw } from '../../common/throw';
@@ -17,6 +18,7 @@ import {
   PartialSite,
   Site,
   LogCollection,
+  ValidateCallback,
 } from '../types';
 import bbcode from './bbcode';
 import dic from './dic';
@@ -347,6 +349,22 @@ async function extract([st, site]: [string, Site], callback: ExtractCallback) {
   });
 }
 
+async function validate(callback: ValidateCallback) {
+  await callback(
+    $('#upload_logs .label').append($('<br>')),
+    '#file[name^=logfiles]',
+  );
+  const form = $('#dynamic_form')[0];
+  if (form) {
+    onDescendantAdded($(form).single(), false, async (node) => {
+      const label = $(node).find('#upload_logs .label');
+      if (label.length) {
+        await callback(label.append($('<br>')), '#file[name^=logfiles]');
+      }
+    });
+  }
+}
+
 async function _getJson<T extends 'arraybuffer' | 'json'>(
   gazelle: string,
   type: T,
@@ -366,9 +384,10 @@ async function adaptAuto(gazelle: string) {
     }),
   ).files;
 
-  await changed(
+  await nextMutation(
     $('#dynamic_form').single(),
     'childList',
+    undefined,
     undefined,
     json_input,
   );
@@ -508,7 +527,8 @@ export default function (framework: typeof sites.gazelle) {
   (
     Object.entries(framework) as [keyof typeof framework, PartialSite][]
   ).forEach(([st, site]) => {
-    site['extract'] = extract;
+    site.extract = extract;
+    site.validate = validate;
     switch (st) {
       case 'DIC':
         return dic(site);

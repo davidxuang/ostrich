@@ -1,4 +1,4 @@
-import { changed } from '../../common/html';
+import { nextMutation } from '../../common/html';
 import log from '../../common/log';
 import { _throw } from '../../common/throw';
 import { PartialSite } from '../types';
@@ -13,7 +13,7 @@ export default function (site: PartialSite) {
     $(select_cat).trigger('change');
     const form_div = select_cat.nextElementSibling ?? _throw(select_cat);
     while (form_div.children.length <= 1)
-      await changed(
+      await nextMutation(
         select_cat.nextElementSibling ?? _throw(select_cat),
         'childList',
       );
