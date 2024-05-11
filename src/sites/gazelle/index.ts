@@ -158,41 +158,45 @@ function _mostCommon<T extends string | number>(array: T[], invalid: T) {
 }
 
 function _recoverLog(log: string) {
-  if (log.startsWith('Exact Audio Copy')) {
-    return (
-      log
-        .replace('\r\n', '\n')
-        .replace(
-          /^Used [Dd]rive( +: .+?)(?: \(not found in database\))?$/m,
-          'Used drive$1',
-        )
-        // .replace(/Additional command line options +: .+(\n.+)+/m, (sub) =>
-        //   sub.replace('\n', ''),
-        // )
-        .split('\n\n')
-        .map((block) => {
-          let lines = block.split('\n');
-          if (
-            lines.some((line) =>
-              line.startsWith('Delete leading and trailing silent blocks'),
-            )
-          ) {
-            // find most common colon position
-            const common_pos = _mostCommon(
-              lines.map((line) => line.indexOf(':')),
-              -1,
-            );
-            lines = lines.map((line) => {
-              const pos = line.indexOf(':');
-              return line.slice(0, pos).padEnd(common_pos) + line.slice(pos);
-            });
-          }
-          return lines.join('\n');
-        })
-        .join('\n\n')
-        .replace('\n', '\r\n')
-    );
-  } else if (log.startsWith('X Lossless Decoder')) {
+  if (
+    log.startsWith('Exact Audio Copy') ||
+    log.startsWith('EAC extraction logfile')
+  ) {
+    return log
+      .replace('\r\n', '\n')
+      .replace(
+        /^Used [Dd]rive( +: .+?)(?: \(not found in database\))?$/m,
+        'Used drive$1',
+      )
+      .replace(/Additional command line options +: .+(\n.+)+/m, (sub) =>
+        sub.replace('\n', ''),
+      )
+      .split('\n\n')
+      .map((block) => {
+        let lines = block.split('\n');
+        if (
+          lines.some((line) =>
+            line.startsWith('Delete leading and trailing silent blocks'),
+          )
+        ) {
+          // find most common colon position
+          const common_pos = _mostCommon(
+            lines.map((line) => line.indexOf(':')),
+            -1,
+          );
+          lines = lines.map((line) => {
+            const pos = line.indexOf(':');
+            return line.slice(0, pos).padEnd(common_pos) + line.slice(pos);
+          });
+        }
+        return lines.join('\n');
+      })
+      .join('\n\n')
+      .replace('\n', '\r\n');
+  } else if (
+    log.startsWith('X Lossless Decoder') ||
+    log.startsWith('XLD extraction logfile')
+  ) {
     return log
       .replace('\r\n', '\n')
       .replace(

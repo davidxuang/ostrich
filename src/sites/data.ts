@@ -15,29 +15,27 @@ let data: FrameworkMap &
     };
   } = {} as any;
 
-function _transform<T extends keyof Override>(fw: T) {
-  data[fw] = {} as any;
-  (Object.keys(_data.override[fw]) as (keyof Override[T])[]).forEach((st) => {
-    const base = _data.base[fw] satisfies SiteEntries as SiteEntries;
-    let site = _data.override[fw][st] as PartialSite;
-    site.include = {
-      ...base.include,
-      ...site.include,
-    };
-    site.exclude = {
-      ...base.exclude,
-      ...site.exclude,
-    };
-    site.actions = {
-      ...base.actions,
-      ...site.actions,
-    };
-    (data[fw][st] as PartialSite) = site;
-  });
-}
-
 (Object.keys(_data.override) as (keyof Override)[]).forEach((fw) =>
-  _transform(fw),
+  (<T extends keyof Override>(fw: T): void => {
+    data[fw] = {} as any;
+    (Object.keys(_data.override[fw]) as (keyof Override[T])[]).forEach((st) => {
+      const base = _data.base[fw] satisfies SiteEntries as SiteEntries;
+      let site = _data.override[fw][st] as PartialSite;
+      site.include = {
+        ...base.include,
+        ...site.include,
+      };
+      site.exclude = {
+        ...base.exclude,
+        ...site.exclude,
+      };
+      site.actions = {
+        ...base.actions,
+        ...site.actions,
+      };
+      (data[fw][st] as PartialSite) = site;
+    });
+  })(fw),
 );
 
 export default data;
