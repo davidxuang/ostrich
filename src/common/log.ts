@@ -55,7 +55,7 @@ function toFile(logs: LogCollection, title: string) {
             type: 'text/plain',
           });
         } else if (log.startsWith('X Lossless Decoder')) {
-          return new File([new TextEncoder().encode(log).buffer], name, {
+          return new File([new TextEncoder().encode(`${log}\n`).buffer], name, {
             type: 'text/plain',
           });
         } else {
