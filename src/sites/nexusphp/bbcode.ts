@@ -102,13 +102,13 @@ function _dump(n: BBNode, depth = -1): string {
   }
 
   if (_is.void(np)) {
-    return `[${n['#']}]`;
+    return `[${np['#']}]`;
   } else if (_is.valueVoid(np)) {
     return `[${np['#']}=${np.$}]`;
   } else if (_is.view(np)) {
-    return `[${np['#']}]${np.$$.map((n) => _dump(n)).join('')}[/${n['#']}]`;
+    return `[${np['#']}]${np.$$.map((c) => _dump(c)).join('')}[/${np['#']}]`;
   } else if (_is.valueView(np)) {
-    return `[${np['#']}=${np.$}]${np.$$.map((n) => _dump(n)).join('')}[/${n['#']}]`;
+    return `[${np['#']}=${np.$}]${np.$$.map((c) => _dump(c)).join('')}[/${np['#']}]`;
   } else {
     throw n;
   }
