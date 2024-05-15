@@ -14,9 +14,9 @@ function _dump(n: BBNode, ordered = false): string {
     case 'img':
       return `[${tag}=${n.$}]${n.alt}[/${tag}]`;
     case 'ul':
-      return n.$$.map((n) => _dump(n)).join('');
+      return n.$$.map((n) => _dump(n)).join('\n');
     case 'ol':
-      return n.$$.map((n) => _dump(n), true).join('');
+      return n.$$.map((n) => _dump(n, true)).join('\n');
     case '#collapse':
     case '#spoiler':
       tag = 'hide';
