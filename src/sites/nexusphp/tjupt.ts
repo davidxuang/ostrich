@@ -1,3 +1,4 @@
+import { dumpDescriptions } from '..';
 import { nextMutation } from '../../common/html';
 import log from '../../common/log';
 import { _throw } from '../../common/throw';
@@ -5,7 +6,7 @@ import { PartialSite } from '../types';
 import bbcode from './bbcode';
 
 export default function (site: PartialSite) {
-  site.adapt = async (payload) => {
+  site.adapt = async (payload, callback) => {
     const record = payload.record;
     const select_cat = $<HTMLSelectElement>('#browsecat').single();
     select_cat.value = '406'; // Music cat
@@ -35,20 +36,20 @@ export default function (site: PartialSite) {
       .filter((i) => i)
       .join(' / ');
 
-    $<HTMLTextAreaElement>('#descr').single().value = [
-      `[img]${record.group.image}[/img]`,
-      record.group.description instanceof Object
-        ? bbcode.dump(record.group.description)
-        : record.group.description,
-      record.item.description,
-      record.item.logs
-        ? log
-            .toString(record.item.logs)
-            .map((log) => `[hide=Log][code]${log}[/code][/hide]`)
-            .join('\n')
-        : undefined,
-    ]
-      .filter((i) => i)
-      .join('\n[hr]\n');
+    const logs = record.item.logs
+      ? log
+          .toString(record.item.logs)
+          .map((log) => `[hide=Log][code]${log}[/code][/hide]`)
+          .join('\n')
+      : undefined;
+    await callback(
+      $('tr:has(#descr) > .rowhead'),
+      $('#descr'),
+      dumpDescriptions([record.group, record.item], bbcode.dump).map((s) =>
+        [`[img]${record.group.image}[/img]`, s, logs]
+          .filter((i) => i)
+          .join('\n[hr]\n'),
+      ),
+    );
   };
 }

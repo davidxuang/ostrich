@@ -93,10 +93,11 @@ if (cat === 'validate') {
     if (site.validate) {
       await site.validate(async (container, selector) => {
         const anchor = $('<a>')
-          .appendTo(container)
+          .appendTo(container.append($('<br>')))
           .text('Validate')
-          .attr('href', '#_ostrich');
-        anchor.on('click', async () => {
+          .attr('href', '#_ostrich')
+          .single();
+        anchor.onclick = async () => {
           await Promise.all(
             $<HTMLInputElement>(selector)
               .toArray()
@@ -109,7 +110,7 @@ if (cat === 'validate') {
                 );
               }),
           );
-        });
+        };
       });
     }
 
@@ -138,7 +139,23 @@ if (cat === 'validate') {
       });
 
       if (site.adapt) {
-        await site.adapt(payload);
+        await site.adapt(payload, async (container, input, selections) => {
+          selections = selections.filter((s) => s);
+          if (selections.length >= 1) {
+            input.single().value = selections[0];
+            if (selections.length > 1) {
+              const anchor = $('<a>')
+                .appendTo(container.append($('<br>')))
+                .text('Toggle')
+                .attr('href', '#_ostrich')
+                .single();
+              anchor.onclick = () => {
+                selections.push(selections.shift()!);
+                input.single().value = selections[0];
+              };
+            }
+          }
+        });
 
         switch (fw) {
           case 'gazelle':

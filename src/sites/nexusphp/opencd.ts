@@ -1,3 +1,4 @@
+import { dumpDescriptions } from '..';
 import {
   nextMutation,
   parseHeaders,
@@ -12,13 +13,10 @@ import bbcode from './bbcode';
 
 export default function (site: PartialSite) {
   site.validate = async (callback) => {
-    await callback(
-      $('.rowhead[msg^=NFO]').append($('<br>')),
-      'input[name^=nfo1]',
-    );
+    await callback($('.rowhead[msg^=NFO]'), 'input[name^=nfo1]');
   };
 
-  site.adapt = async (payload) => {
+  site.adapt = async (payload, callback) => {
     const record = payload.record;
     const cover_task = xmlHttpRequest({
       method: 'GET',
@@ -87,14 +85,11 @@ export default function (site: PartialSite) {
       });
     }
 
-    $<HTMLTextAreaElement>('#descr').single().value = [
-      record.group.description instanceof Object
-        ? bbcode.dump(record.group.description)
-        : record.group.description,
-      record.item.description,
-    ]
-      .filter((i) => i)
-      .join('\n[hr]\n');
+    await callback(
+      $('tr:has(#descr) > .rowhead'),
+      $('#descr'),
+      dumpDescriptions([record.group, record.item], bbcode.dump),
+    );
 
     await cover_task;
   };

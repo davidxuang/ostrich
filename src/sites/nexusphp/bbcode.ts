@@ -73,14 +73,14 @@ function _dump(n: BBNode, depth = -1): string {
       case 'ul':
         ++depth;
         return n.$$.map(
-          (x) =>
-            `${'    '.repeat(depth)}[*] ${x.$$.map((y) => _dump(y, depth))}`,
+          (li) =>
+            `${'    '.repeat(depth)}[*] ${li.$$.map((c) => _dump(c, depth)).join()}`,
         ).join('\n');
       case 'ol':
         ++depth;
         return n.$$.map(
-          (x, i) =>
-            `${'    '.repeat(depth)}[*] ${i + 1}. ${x.$$.map((y) => _dump(y, depth))}`,
+          (li, i) =>
+            `${'    '.repeat(depth)}[*] ${i + 1}. ${li.$$.map((c) => _dump(c, depth)).join()}`,
         ).join('\n');
       default:
         return n;

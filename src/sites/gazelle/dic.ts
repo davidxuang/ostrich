@@ -1,9 +1,8 @@
 import { PartialSite } from '../types';
-import { adaptUniversal, adaptAuto, adaptLogs } from '.';
-import bbcode from './bbcode';
+import { adaptUniversal, adaptAuto, adaptLogs, adaptDescriptions } from '.';
 
 export default function (site: PartialSite) {
-  site.adapt = async (payload) => {
+  site.adapt = async (payload, callback) => {
     const record = payload.record;
 
     if (payload['gazelle']) {
@@ -11,14 +10,9 @@ export default function (site: PartialSite) {
 
       // avoid racing
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      $<HTMLTextAreaElement>('#album_desc').single().value =
-        record.group.description instanceof Object
-          ? bbcode.dump(record.group.description)
-          : record.group.description;
-      $<HTMLTextAreaElement>('#release_desc').single().value =
-        record.item.description;
+      await adaptDescriptions(payload.record, callback);
     } else {
-      await adaptUniversal(payload.record);
+      await adaptUniversal(payload.record, callback);
     }
 
     if (record.item.logs) {

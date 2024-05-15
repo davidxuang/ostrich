@@ -1,8 +1,9 @@
+import { BBNode } from '../common/bbcode';
 import { _throw } from '../common/throw';
 import data from './data';
 import gazelle from './gazelle';
 import nexusphp from './nexusphp';
-import { Site, SiteIncludeTypes } from './types';
+import { Description, Site, SiteIncludeTypes } from './types';
 
 gazelle(data.gazelle);
 nexusphp(data.nexusphp);
@@ -43,7 +44,30 @@ function parseSites(location: Location) {
   ];
 }
 
-export { parseSites };
+function dumpDescriptions(
+  descriptions: Description[],
+  dump: (nodes: BBNode[]) => string,
+) {
+  const array = descriptions.map((d) => [
+    d.description,
+    d.description_tree ? dump(d.description_tree) : undefined,
+  ]);
+  function* _join() {
+    if (array[0][0] !== undefined) {
+      yield [array[0][0], ...array.slice(1).map((p) => p[0] ?? p[1] ?? '')]
+        .filter((d) => d)
+        .join('\n[hr]\n');
+    }
+    if (array[0][1] !== undefined) {
+      yield [array[0][1], ...array.slice(1).map((p) => p[1] ?? p[0] ?? '')]
+        .filter((d) => d)
+        .join('\n[hr]\n');
+    }
+  }
+  return Array.from(_join());
+}
+
+export { parseSites, dumpDescriptions };
 export default data as typeof data & {
   [fw in keyof typeof data]: {
     [st in keyof (typeof data)[fw]]: Site;

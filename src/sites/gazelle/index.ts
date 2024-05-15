@@ -1,4 +1,5 @@
 import typia from 'typia';
+import { dumpDescriptions } from '..';
 import base64url from '../../common/base64url';
 import bb from '../../common/bbcode';
 import {
@@ -19,6 +20,7 @@ import {
   Site,
   LogCollection,
   ValidateCallback,
+  AdaptCallback,
 } from '../types';
 import bbcode from './bbcode';
 import dic from './dic';
@@ -89,48 +91,47 @@ type TorrentEntry = {
 type TorrentResponse = Reseponse<TorrentEntry>;
 
 function _toRecord(
-  d: TorrentEntry,
+  e: TorrentEntry,
   logs: LogCollection | undefined,
   site: string,
   base: URL,
 ): Record {
-  const group_bb = d.group.bbBody ?? d.group.wikiBBcode;
+  const group_bb = e.group.bbBody ?? e.group.wikiBBcode;
   return {
     site: site,
     group: {
-      name: unescapeHtml(d.group.name),
-      artists: d.group.musicInfo.artists.map((a) => a.name),
-      guests: d.group.musicInfo.with.map((a) => a.name),
-      composers: d.group.musicInfo.composers.map((a) => a.name),
-      conductor: d.group.musicInfo.conductor.map((a) => a.name),
-      producer: d.group.musicInfo.producer.map((a) => a.name),
-      dj: d.group.musicInfo.dj.map((a) => a.name),
-      remixer: d.group.musicInfo.remixedBy.map((a) => a.name),
-      description: group_bb
-        ? unescapeHtml(group_bb)
-        : bb.fromHTML(
-            new DOMParser().parseFromString(
-              `<html><body>${d.group.wikiBody}</body></html>`,
-              'text/html',
-            ).body,
-            base,
-          ),
-      label: unescapeHtml(d.group.recordLabel),
-      catalogue: unescapeHtml(d.group.catalogueNumber),
-      year: d.group.year,
-      image: d.group.wikiImage,
+      name: unescapeHtml(e.group.name),
+      artists: e.group.musicInfo.artists.map((a) => a.name),
+      guests: e.group.musicInfo.with.map((a) => a.name),
+      composers: e.group.musicInfo.composers.map((a) => a.name),
+      conductor: e.group.musicInfo.conductor.map((a) => a.name),
+      producer: e.group.musicInfo.producer.map((a) => a.name),
+      dj: e.group.musicInfo.dj.map((a) => a.name),
+      remixer: e.group.musicInfo.remixedBy.map((a) => a.name),
+      description: group_bb ? unescapeHtml(group_bb) : undefined,
+      description_tree: bb.fromHTML(
+        new DOMParser().parseFromString(
+          `<html><body>${e.group.wikiBody}</body></html>`,
+          'text/html',
+        ).body,
+        base,
+      ),
+      label: unescapeHtml(e.group.recordLabel),
+      catalogue: unescapeHtml(e.group.catalogueNumber),
+      year: e.group.year,
+      image: e.group.wikiImage,
     },
     item: {
-      name: unescapeHtml(d.torrent.remasterTitle),
-      description: unescapeHtml(d.torrent.description),
-      label: unescapeHtml(d.torrent.remasterRecordLabel),
-      catalogue: unescapeHtml(d.torrent.remasterCatalogueNumber),
-      year: d.torrent.remasterYear,
-      media: d.torrent.media,
-      encoding: d.torrent.encoding,
-      format: d.torrent.format,
-      scene: d.torrent.scene,
-      uploaded_by: d.torrent.username,
+      name: unescapeHtml(e.torrent.remasterTitle),
+      description: unescapeHtml(e.torrent.description),
+      label: unescapeHtml(e.torrent.remasterRecordLabel),
+      catalogue: unescapeHtml(e.torrent.remasterCatalogueNumber),
+      year: e.torrent.remasterYear,
+      media: e.torrent.media,
+      encoding: e.torrent.encoding,
+      format: e.torrent.format,
+      scene: e.torrent.scene,
+      uploaded_by: e.torrent.username,
       logs: logs,
     },
   };
@@ -354,16 +355,13 @@ async function extract([st, site]: [string, Site], callback: ExtractCallback) {
 }
 
 async function validate(callback: ValidateCallback) {
-  await callback(
-    $('#upload_logs .label').append($('<br>')),
-    '#file[name^=logfiles]',
-  );
+  await callback($('#upload_logs .label'), '#file[name^=logfiles]');
   const form = $('#dynamic_form')[0];
   if (form) {
     onDescendantAdded($(form).single(), false, async (node) => {
       const label = $(node).find('#upload_logs .label');
       if (label.length) {
-        await callback(label.append($('<br>')), '#file[name^=logfiles]');
+        await callback(label, '#file[name^=logfiles]');
       }
     });
   }
@@ -418,7 +416,20 @@ function _adaptArtistRole(role: keyof Group['musicInfo']) {
   }
 }
 
-async function adaptUniversal(record: Record) {
+async function adaptDescriptions(record: Record, callback: AdaptCallback) {
+  await callback(
+    $('tr:has(#album_desc) > .label'),
+    $('#album_desc'),
+    dumpDescriptions([record.group], bbcode.dump),
+  );
+  await callback(
+    $('tr:has(#release_desc) > .label'),
+    $('#release_desc'),
+    dumpDescriptions([record.item], bbcode.dump),
+  );
+}
+
+async function adaptUniversal(record: Record, callback: AdaptCallback) {
   $<HTMLInputElement>('#title').single().value = record.group.name;
   $<HTMLInputElement>('#year').single().value = record.group.year.toString();
 
@@ -445,12 +456,7 @@ async function adaptUniversal(record: Record) {
   trySelect($<HTMLSelectElement>('#media').single(), record.item.media);
 
   $<HTMLInputElement>('#image').single().value = record.group.image;
-  $<HTMLTextAreaElement>('#album_desc').single().value =
-    typeof record.group.description == 'string'
-      ? record.group.description
-      : bbcode.dump(record.group.description);
-  $<HTMLTextAreaElement>('#release_desc').single().value =
-    record.item.description;
+  await adaptDescriptions(record, callback);
 }
 
 function _adaptReleaseType(
@@ -525,7 +531,13 @@ async function adaptLogs(logs: LogCollection, name: string) {
   log_input.files = toDataTransfer(log.toFile(logs, name)).files;
 }
 
-export { adaptAuto, adaptUniversal, adaptGazelle, adaptLogs };
+export {
+  adaptAuto,
+  adaptDescriptions,
+  adaptUniversal,
+  adaptGazelle,
+  adaptLogs,
+};
 export type { Artist, Group, Torrent, TorrentResponse };
 export default function (framework: typeof sites.gazelle) {
   (

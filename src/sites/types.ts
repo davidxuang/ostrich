@@ -9,7 +9,17 @@ type LogCollection =
   | {
       plain?: undefined;
       encoded: string[]; // base64url
-      recovered?: undefined;
+      recovered?: boolean;
+    };
+
+type Description =
+  | {
+      description: string;
+      description_tree?: BBNode[];
+    }
+  | {
+      description?: string;
+      description_tree: BBNode[];
     };
 
 type Record = {
@@ -23,15 +33,13 @@ type Record = {
     producer: string[];
     dj: string[];
     remixer: string[];
-    description: string | BBNode[];
     label: string;
     catalogue: string;
     year: number;
     image: string;
-  };
+  } & Description;
   item: {
     name?: string;
-    description: string;
     label?: string;
     catalogue?: string;
     year?: number;
@@ -41,7 +49,7 @@ type Record = {
     scene: boolean;
     uploaded_by: string;
     logs?: LogCollection;
-  };
+  } & Description;
 };
 
 interface Payload {
@@ -51,6 +59,11 @@ interface Payload {
 }
 type ExtractCallback = (container: JQuery, payload: Payload) => Promise<void>;
 type ValidateCallback = (container: JQuery, selector: string) => Promise<void>;
+type AdaptCallback = (
+  container: JQuery,
+  input: JQuery<HTMLInputElement | HTMLTextAreaElement>,
+  selections: string[],
+) => Promise<void>;
 
 type SiteCore = {
   hostname: string;
@@ -58,7 +71,7 @@ type SiteCore = {
 
   extract?: (site: [string, Site], callback: ExtractCallback) => Promise<void>;
   validate?: (callback: ValidateCallback) => Promise<void>;
-  adapt?: (payload: Payload) => Promise<void>;
+  adapt?: (payload: Payload, callback: AdaptCallback) => Promise<void>;
 };
 
 type SiteInclues = {
@@ -89,10 +102,12 @@ type FrameworkMap = { [fw: string]: { [st: string]: Site } };
 
 export type {
   LogCollection,
+  Description,
   Record,
   Payload,
   ValidateCallback,
   ExtractCallback,
+  AdaptCallback,
   SiteEntries,
   PartialSite,
   Site,
