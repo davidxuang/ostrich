@@ -92,9 +92,9 @@ type TorrentResponse = Reseponse<TorrentEntry>;
 
 function _toRecord(
   e: TorrentEntry,
-  logs: LogCollection | undefined,
   site: string,
   base: URL,
+  logs: LogCollection | undefined,
 ): Record {
   const group_bb = e.group.bbBody ?? e.group.wikiBBcode;
   return {
@@ -274,13 +274,13 @@ async function extract([st, site]: [string, Site], callback: ExtractCallback) {
           .appendTo(links_container);
 
         // get metadata
-        const meta_url = new URL(
+        const gazelle_url = new URL(
           `/ajax.php?action=torrent&id=${torrent_id}`,
           location.href,
         ).toString();
-        const meta = await xmlHttpRequest({
+        const record = await xmlHttpRequest({
           method: 'GET',
-          url: meta_url,
+          url: gazelle_url,
           responseType: 'json',
         }).then(async (event) => {
           let r = event.response as TorrentResponse;
@@ -336,15 +336,15 @@ async function extract([st, site]: [string, Site], callback: ExtractCallback) {
             logs = undefined;
           }
 
-          return _toRecord(r.response, logs, st, new URL(location.href));
+          return _toRecord(r.response, st, new URL(location.href), logs);
         });
 
         // create links
         links.text('Repost to: ');
         await callback(links, {
           torrent: torrent_url.toString(),
-          record: meta,
-          gazelle: meta_url,
+          record: record,
+          gazelle: gazelle_url,
         });
         initialised = true;
       } finally {
