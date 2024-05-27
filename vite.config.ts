@@ -15,7 +15,7 @@ export default defineConfig({
     monkey({
       entry: 'src/main.ts',
       build: {
-        metaFileName: true
+        metaFileName: true,
       },
       userscript: {
         icon: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji/assets/Musical%20score/3D/musical_score_3d.png',
@@ -41,6 +41,10 @@ export default defineConfig({
           brotli_wasm_bg:
             'https://cdn.jsdelivr.net/npm/brotli-wasm@3/pkg.web/brotli_wasm_bg.wasm',
         },
+        updateURL:
+          'https://github.com/davidxuang/timetable2lua/releases/latest/download/timetable2lua.meta.js',
+        downloadURL:
+          'https://github.com/davidxuang/timetable2lua/releases/latest/download/timetable2lua.user.js',
       },
     }),
     (() => {
