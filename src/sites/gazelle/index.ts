@@ -320,6 +320,7 @@ async function extract([st, site]: [string, Site], callback: ExtractCallback) {
                       );
                     }),
                   ),
+                  score: r.response.torrent.logScore,
                 };
               } else {
                 return {
@@ -329,6 +330,7 @@ async function extract([st, site]: [string, Site], callback: ExtractCallback) {
                     .toArray()
                     .map(_recoverLog),
                   recovered: true,
+                  score: r.response.torrent.logScore,
                 };
               }
             });

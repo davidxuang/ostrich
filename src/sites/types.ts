@@ -5,11 +5,13 @@ type LogCollection =
       plain: string[];
       encoded?: undefined;
       recovered?: boolean;
+      score: number;
     }
   | {
       plain?: undefined;
       encoded: string[]; // base64url
       recovered?: boolean;
+      score: number;
     };
 
 type Description =
