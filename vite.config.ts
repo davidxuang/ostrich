@@ -14,6 +14,9 @@ export default defineConfig({
     },
     monkey({
       entry: 'src/main.ts',
+      build: {
+        metaFileName: true
+      },
       userscript: {
         icon: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji/assets/Musical%20score/3D/musical_score_3d.png',
         description: {
