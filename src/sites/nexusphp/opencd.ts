@@ -70,7 +70,6 @@ export default function (site: PartialSite) {
       record.group.year !== record.item.year && record.item.year,
       record.item.label ? record.item.label : record.group.label,
       record.item.catalogue ? record.item.catalogue : record.group.catalogue,
-      record.item.logs?.score && `Log (${record.item.logs.score}%)`,
     ]
       .filter((i) => i)
       .join(' / ');
