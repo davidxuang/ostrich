@@ -42,9 +42,9 @@ export default defineConfig({
             'https://cdn.jsdelivr.net/npm/brotli-wasm@3/pkg.web/brotli_wasm_bg.wasm',
         },
         updateURL:
-          'https://github.com/davidxuang/timetable2lua/releases/latest/download/timetable2lua.meta.js',
+          'https://github.com/davidxuang/ostrich/releases/latest/download/ostrich.meta.js',
         downloadURL:
-          'https://github.com/davidxuang/timetable2lua/releases/latest/download/timetable2lua.user.js',
+          'https://github.com/davidxuang/ostrich/releases/latest/download/ostrich.user.js',
       },
     }),
     (() => {
