@@ -171,10 +171,10 @@ type BBElement =
   | TableRow
   | TableCell;
 
-type BBValueView = Extract<BBElement, ValueViewElement<any>>;
+type BBValueView = Extract<BBElement, ValueViewElement<any, any>>;
 type BBView = Exclude<Extract<BBElement, ViewElement<any>>, BBValueView>;
 type BBValueVoid = Exclude<
-  Extract<BBElement, ValueVoidElement<any>>,
+  Extract<BBElement, ValueVoidElement<any, any>>,
   BBValueView
 >;
 type BBVoid = Exclude<

@@ -26,12 +26,14 @@ function _dump(n: BBNode, ordered = false): string {
   if (bb.is.void(n)) {
     return `[${tag}]`;
   } else if (bb.is.valueVoid(n)) {
-    n satisfies never;
-    return `[${tag}=${n['$']}]`;
+    return n satisfies never;
+    //return n.$ ? `[${n['#']}=${n.$}]` : `[${n['#']}]`;
   } else if (bb.is.view(n)) {
     return `[${tag}]${n.$$.map((x) => _dump(x)).join('')}[/${tag}]`;
   } else if (bb.is.valueView(n)) {
-    return `[${tag}=${n.$}]${n.$$.map((x) => _dump(x)).join('')}[/${tag}]`;
+    return n.$
+      ? `[${tag}=${n.$}]${n.$$.map((x) => _dump(x)).join('')}[/${tag}]`
+      : `[${tag}]${n.$$.map((x) => _dump(x)).join('')}[/${tag}]`;
   } else {
     throw n;
   }
