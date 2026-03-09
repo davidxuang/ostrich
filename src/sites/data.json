@@ -72,7 +72,7 @@
         }
       },
       "Redacted": {
-        "hostname": "redacted.ch",
+        "hostname": "redacted.sh",
         "selects": {
           "releaseType": {
             "1": "Album",
