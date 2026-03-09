@@ -1,7 +1,7 @@
 {
   "name": "ostrich",
   "private": true,
-  "version": "0.2.10",
+  "version": "0.2.11",
   "description": "Reposting music torrents on sites built on Gazelle and other frameworks",
   "homepage": "https://github.com/davidxuang/ostrich",
   "type": "module",
@@ -20,7 +20,7 @@
   "author": "davidxuang",
   "license": "AGPL-3.0-only",
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^4.0.0",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.0",
     "@types/jquery": "^3.0.0",
     "prettier": "^3.0.0",
     "rollup-plugin-typescript2": "^0.36.0",
@@ -28,13 +28,13 @@
     "ts-patch": "^3.0.0",
     "tslib": "^2.0.0",
     "typescript": "^5.0.0",
-    "vite": "^5.0.0",
-    "vite-plugin-monkey": "^3.0.0"
+    "vite": "^7.0.0",
+    "vite-plugin-monkey": "^7.0.0"
   },
   "dependencies": {
-    "brotli-wasm": "^3.0.0",
+    "brotli-wasm": "3.0.0",
     "js-base64": "^3.0.0",
-    "typia": "^6.0.0"
+    "typia": "^11.0.0"
   },
   "pnpm": {
     "patchedDependencies": {

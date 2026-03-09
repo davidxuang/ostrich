@@ -105,7 +105,7 @@ const base64url = {
   // EncoderStream,
   decode: Base64.decode,
   encode: (v: string) => Base64.encode(v, true),
-  decodeBytes: Base64.toUint8Array,
+  decodeBytes: (v: string) => Base64.toUint8Array(v) as Uint8Array<ArrayBuffer>, // patch the type per `js-base64` implementation
   encodeBytes: (v: Uint8Array) => Base64.fromUint8Array(v, true),
 };
 

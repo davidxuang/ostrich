@@ -1,4 +1,8 @@
-import { GM_xmlhttpRequest, GmXhrRequest } from '$';
+import {
+  GM_xmlhttpRequest,
+  GmResponseTypeMap,
+  GmXmlhttpRequestOption,
+} from '$';
 
 type ResponseTypes = keyof {
   text: string;
@@ -9,12 +13,13 @@ type ResponseTypes = keyof {
   stream: ReadableStream<Uint8Array>;
 };
 
-function xmlHttpRequest<TContext, TResponse extends ResponseTypes = 'text'>(
-  details: GmXhrRequest<TContext, TResponse>,
-) {
+function xmlHttpRequest<
+  TContext extends keyof GmResponseTypeMap,
+  TResponse extends ResponseTypes = 'text',
+>(details: GmXmlhttpRequestOption<TContext, TResponse>) {
   return new Promise<
     Parameters<
-      Exclude<GmXhrRequest<TContext, TResponse>['onload'], undefined>
+      Exclude<GmXmlhttpRequestOption<TContext, TResponse>['onload'], undefined>
     >[0]
   >((resolve, reject) => {
     GM_xmlhttpRequest<TContext, TResponse>({

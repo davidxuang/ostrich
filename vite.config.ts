@@ -63,10 +63,11 @@ export default defineConfig({
         generateBundle(_options, bundle, _isWrite) {
           Object.entries(bundle).forEach(([f, file]) => {
             if (
-              typeof file['code'] === 'string' &&
+              'code' in file &&
+              typeof file.code === 'string' &&
               file.fileName.endsWith('.user.js')
             ) {
-              file['code'] = file['code'].replace('__import__', 'import');
+              file.code = file.code.replace('__import__', 'import');
             }
           });
         },
