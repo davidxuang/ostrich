@@ -529,7 +529,9 @@ async function adaptGazelle(
 }
 
 async function adaptLogs(logs: LogCollection, name: string) {
-  const log_input = $<HTMLInputElement>('#file[name^=logfiles]').single();
+  const log_input = $<HTMLInputElement>(
+    '#file[name^=logfiles], #logfile_1[name^=logfile]',
+  ).single();
   log_input.files = toDataTransfer(log.toFile(logs, name)).files;
 }
 
