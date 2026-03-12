@@ -139,6 +139,20 @@ if (cat === 'validate') {
       });
 
       if (site.adapt) {
+        switch (fw) {
+          case 'gazelle':
+            await torrent_task.then((data) => {
+              $<HTMLInputElement>('#file[name=file_input]').single().files =
+                data.files;
+            });
+            break;
+          case 'nexusphp':
+            await torrent_task.then((data) => {
+              $<HTMLInputElement>('#torrent').single().files = data.files;
+            });
+            break;
+        }
+
         await site.adapt(payload, async (container, input, selections) => {
           selections = selections.filter((s) => s);
           if (selections.length >= 1) {
@@ -156,20 +170,6 @@ if (cat === 'validate') {
             }
           }
         });
-
-        switch (fw) {
-          case 'gazelle':
-            await torrent_task.then((data) => {
-              $<HTMLInputElement>('#file[name=file_input]').single().files =
-                data.files;
-            });
-            break;
-          case 'nexusphp':
-            await torrent_task.then((data) => {
-              $<HTMLInputElement>('#torrent').single().files = data.files;
-            });
-            break;
-        }
       }
     }
   }
