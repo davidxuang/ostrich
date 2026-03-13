@@ -6,17 +6,20 @@ import {
   trySelect,
   xmlHttpRequest,
 } from '../../common/html';
+import l10n from '../../common/l10n';
 import log from '../../common/log';
 import { _throw } from '../../common/throw';
 import { PartialSite } from '../types';
 import bbcode from './bbcode';
 
-export default function (site: PartialSite) {
-  site.validate = async (callback) => {
+export default function (def: PartialSite) {
+  def.lang = 'zh';
+
+  def.validate = async (callback) => {
     await callback($('.rowhead[msg^=NFO]'), 'input[name^=nfo1]');
   };
 
-  site.adapt = async (payload, callback) => {
+  def.adapt = async (site, payload, callback) => {
     const record = payload.record;
     const cover_task = xmlHttpRequest({
       method: 'GET',
@@ -51,9 +54,13 @@ export default function (site: PartialSite) {
     }
 
     $<HTMLSelectElement>('#browsecat').single().value = '408'; // Music cat
-    $<HTMLInputElement>('#artist').single().value =
-      record.group.artists.join(' / ');
-    $<HTMLInputElement>('#resource_name').single().value = record.group.name;
+    $<HTMLInputElement>('#artist').single().value = record.group.artists
+      .map((a) => l10n.format(a, site.lang))
+      .join(' / ');
+    $<HTMLInputElement>('#resource_name').single().value = l10n.format(
+      record.group.name,
+      site.lang,
+    );
     const year = $<HTMLInputElement>('#year').single();
     year.value = record.group.year.toString();
     year.dispatchEvent(new Event('change'));
@@ -76,13 +83,15 @@ export default function (site: PartialSite) {
 
     if (record.item.logs) {
       const log_add = $<HTMLInputElement>('#nfoadd').single();
-      log.toFile(record.item.logs, record.group.name).forEach(async (f, i) => {
-        if (i > 0) {
-          log_add.click();
-        }
-        $<HTMLInputElement>(`[name=nfo${'1'.repeat(i + 1)}]`).single().files =
-          toDataTransfer(f).files;
-      });
+      log
+        .toFile(record.item.logs, l10n.select(record.group.name, 'native'))
+        .forEach(async (f, i) => {
+          if (i > 0) {
+            log_add.click();
+          }
+          $<HTMLInputElement>(`[name=nfo${'1'.repeat(i + 1)}]`).single().files =
+            toDataTransfer(f).files;
+        });
     }
 
     await callback(

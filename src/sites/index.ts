@@ -1,19 +1,19 @@
 import { BBNode } from '../common/bbcode';
 import { _throw } from '../common/throw';
+import { Description } from '../common/types';
 import data from './data';
 import gazelle from './gazelle';
 import nexusphp from './nexusphp';
-import { Description, Site, SiteIncludeTypes } from './types';
+import { NamedSite, Site, SiteIncludeTypes } from './types';
 
 gazelle(data.gazelle);
 nexusphp(data.nexusphp);
 
 function parseSites(location: Location) {
   if (location.hostname.toLowerCase() === 'logs.musichoarders.xyz') {
-    return ['gazelle', '', {}, 'validate'] as [
+    return ['gazelle', {}, 'validate'] as [
       keyof typeof data,
-      string,
-      Site,
+      NamedSite,
       SiteIncludeTypes | 'validate',
     ];
   }
@@ -36,10 +36,9 @@ function parseSites(location: Location) {
         : path === location.pathname;
     }) ?? _throw(location);
 
-  return [fw, st, site, cat] as [
+  return [fw, { ...site, name: st }, cat] as [
     keyof typeof data,
-    string,
-    Site,
+    NamedSite,
     SiteIncludeTypes | 'validate',
   ];
 }

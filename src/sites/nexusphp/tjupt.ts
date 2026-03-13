@@ -1,12 +1,15 @@
 import { dumpDescriptions } from '..';
 import { nextMutation } from '../../common/html';
+import l10n from '../../common/l10n';
 import log from '../../common/log';
 import { _throw } from '../../common/throw';
 import { PartialSite } from '../types';
 import bbcode from './bbcode';
 
-export default function (site: PartialSite) {
-  site.adapt = async (payload, callback) => {
+export default function (def: PartialSite) {
+  def.lang = 'zh';
+
+  def.adapt = async (site, payload, callback) => {
     const record = payload.record;
     const select_cat = $<HTMLSelectElement>('#browsecat').single();
     select_cat.value = '406'; // Music cat
@@ -19,9 +22,13 @@ export default function (site: PartialSite) {
         'childList',
       );
 
-    $<HTMLInputElement>('#hqname').single().value = record.group.name;
-    $<HTMLInputElement>('#artist').single().value =
-      record.group.artists.join(' / ');
+    $<HTMLInputElement>('#hqname').single().value = l10n.format(
+      record.group.name,
+      site.lang,
+    );
+    $<HTMLInputElement>('#artist').single().value = record.group.artists
+      .map((a) => l10n.format(a, site.lang))
+      .join(' / ');
     $<HTMLInputElement>('#issuedate').single().value =
       record.group.year.toString();
     $<HTMLInputElement>('#specificcat').single().value = record.item.media;

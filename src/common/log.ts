@@ -1,5 +1,5 @@
-import { LogCollection } from '../sites/types';
 import base64url from './base64url';
+import { LogCollection } from './types';
 
 const _isBigEndian = (() => {
   const u32 = new Uint32Array([0x574f5244]);

@@ -10,15 +10,21 @@ import {
   xmlHttpRequest,
   onDescendantAdded,
 } from '../../common/html';
+import l10n from '../../common/l10n';
 import log from '../../common/log';
 import { _throw } from '../../common/throw';
+import {
+  Record,
+  LogCollection,
+  Biscriptal,
+  Payload,
+  RecordPersonnel,
+} from '../../common/types';
 import sites from '../data';
 import {
   ExtractCallback,
-  Record,
   PartialSite,
-  Site,
-  LogCollection,
+  NamedSite,
   ValidateCallback,
   AdaptCallback,
 } from '../types';
@@ -26,6 +32,8 @@ import bbcode from './bbcode';
 import dic from './dic';
 import ops from './ops';
 import redacted from './redacted';
+
+const encoder = new TextEncoder();
 
 type Artist = {
   id: number;
@@ -90,24 +98,29 @@ type TorrentEntry = {
 };
 type TorrentResponse = Reseponse<TorrentEntry>;
 
+type Role = keyof Group['musicInfo'] | keyof RecordPersonnel;
+
 function _toRecord(
+  site: NamedSite,
   e: TorrentEntry,
-  site: string,
   base: URL,
   logs: LogCollection | undefined,
 ): Record {
   const group_bb = e.group.bbBody ?? e.group.wikiBBcode;
   return {
-    site: site,
+    site: site.name,
     group: {
-      name: unescapeHtml(e.group.name),
-      artists: e.group.musicInfo.artists.map((a) => a.name),
-      guests: e.group.musicInfo.with.map((a) => a.name),
-      composers: e.group.musicInfo.composers.map((a) => a.name),
-      conductor: e.group.musicInfo.conductor.map((a) => a.name),
-      producer: e.group.musicInfo.producer.map((a) => a.name),
-      dj: e.group.musicInfo.dj.map((a) => a.name),
-      remixer: e.group.musicInfo.remixedBy.map((a) => a.name),
+      type:
+        site.selects?.releaseType[e.group.releaseType.toString()] ??
+        e.group.releaseType.toString(),
+      name: l10n.parse(unescapeHtml(e.group.name)),
+      artists: e.group.musicInfo.artists.map((a) => l10n.parse(a.name)),
+      guests: e.group.musicInfo.with.map((a) => l10n.parse(a.name)),
+      composers: e.group.musicInfo.composers.map((a) => l10n.parse(a.name)),
+      conductor: e.group.musicInfo.conductor.map((a) => l10n.parse(a.name)),
+      producer: e.group.musicInfo.producer.map((a) => l10n.parse(a.name)),
+      dj: e.group.musicInfo.dj.map((a) => l10n.parse(a.name)),
+      remixer: e.group.musicInfo.remixedBy.map((a) => l10n.parse(a.name)),
       description: group_bb ? unescapeHtml(group_bb) : undefined,
       description_tree: bb.fromHTML(
         new DOMParser().parseFromString(
@@ -212,7 +225,7 @@ function _recoverLog(log: string) {
   }
 }
 
-async function extract([st, site]: [string, Site], callback: ExtractCallback) {
+async function extract(site: NamedSite, callback: ExtractCallback) {
   $('tr.torrent_row, .group_torrent:not(.edition)').each((_, header) => {
     let initialised = false;
     let busy = false;
@@ -262,9 +275,7 @@ async function extract([st, site]: [string, Site], callback: ExtractCallback) {
         }
       }
 
-      if (initialised || busy) {
-        return;
-      }
+      if (initialised || busy) return;
       busy = true;
 
       try {
@@ -338,7 +349,7 @@ async function extract([st, site]: [string, Site], callback: ExtractCallback) {
             logs = undefined;
           }
 
-          return _toRecord(r.response, st, new URL(location.href), logs);
+          return _toRecord(site, r.response, new URL(location.href), logs);
         });
 
         // create links
@@ -369,7 +380,7 @@ async function validate(callback: ValidateCallback) {
   }
 }
 
-async function _getJson<T extends 'arraybuffer' | 'json'>(
+async function getJson<T extends 'arraybuffer' | 'json'>(
   gazelle: string,
   type: T,
 ) {
@@ -380,12 +391,40 @@ async function _getJson<T extends 'arraybuffer' | 'json'>(
   }).then((event) => event.response);
 }
 
-async function adaptAuto(gazelle: string) {
+async function getGazelle(site: NamedSite, payload: Payload) {
+  if (payload['gazelle']) {
+    const json: TorrentResponse = await getJson(payload['gazelle'], 'json');
+    if (json.status === 'failure') {
+      throw json;
+    }
+    json.response.group.name = l10n.format(
+      l10n.parse(json.response.group.name),
+      site.lang,
+    );
+    json.response.group.musicInfo.artists =
+      json.response.group.musicInfo.artists.map((a) => ({
+        ...a,
+        name: l10n.format(l10n.parse(a.name), site.lang),
+      }));
+    return json.response;
+  }
+  return undefined;
+}
+
+async function adaptAuto(gazelle: TorrentEntry) {
   const json_input = $<HTMLInputElement>('#torrent-json-file').single();
+  const response: TorrentResponse = {
+    status: 'success',
+    response: gazelle,
+  };
   json_input.files = toDataTransfer(
-    new File([await _getJson(gazelle, 'arraybuffer')], 'gazelle.json', {
-      type: 'application/json',
-    }),
+    new File(
+      [encoder.encode(JSON.stringify(response)).buffer],
+      'gazelle.json',
+      {
+        type: 'application/json',
+      },
+    ),
   ).files;
 
   await nextMutation(
@@ -397,11 +436,12 @@ async function adaptAuto(gazelle: string) {
   );
 }
 
-function _adaptArtistRole(role: keyof Group['musicInfo']) {
+function _adaptArtistRole(role: Role) {
   switch (role) {
     case 'artists':
       return '1';
     case 'with':
+    case 'guests':
       return '2';
     case 'composers':
       return '3';
@@ -410,6 +450,7 @@ function _adaptArtistRole(role: keyof Group['musicInfo']) {
     case 'dj':
       return '5';
     case 'remixedBy':
+    case 'remixer':
       return '6';
     case 'producer':
       return '7';
@@ -431,19 +472,28 @@ async function adaptDescriptions(record: Record, callback: AdaptCallback) {
   );
 }
 
-async function adaptUniversal(record: Record, callback: AdaptCallback) {
-  $<HTMLInputElement>('#title').single().value = record.group.name;
-  $<HTMLInputElement>('#year').single().value = record.group.year.toString();
+function adaptNames(name: string, artists: [string, Role][]) {
+  $<HTMLInputElement>('#title').single().value = name;
 
-  $<HTMLInputElement>('#remaster_year').single().value =
-    record.item.year?.toString() ?? '';
-  $<HTMLInputElement>('#remaster_title').single().value =
-    record.item.name ?? '';
-  $<HTMLInputElement>('#remaster_record_label').single().value =
-    record.item.label ?? '';
-  $<HTMLInputElement>('#remaster_catalogue_number').single().value =
-    record.item.catalogue ?? '';
+  const [artist_add, artist_rm] = $('#artistfields .brackets').toArray();
+  while ($<HTMLInputElement>(`#artist_1`).length > 0) {
+    artist_rm.click();
+  }
+  artists.forEach(([artist, role], i) => {
+    let input: HTMLInputElement;
+    if (i === 0) {
+      input = $<HTMLInputElement>('#artist').single();
+    } else {
+      artist_add.click();
+      input = $<HTMLInputElement>(`#artist_${i}`).single();
+    }
+    input.value = artist;
+    (input.nextElementSibling as HTMLSelectElement).value =
+      _adaptArtistRole(role);
+  });
+}
 
+async function adaptUniversalCore(record: Record, callback: AdaptCallback) {
   const format_select = $<HTMLSelectElement>('#format').single();
   trySelect(format_select, record.item.format);
   $(format_select).trigger('change');
@@ -459,6 +509,35 @@ async function adaptUniversal(record: Record, callback: AdaptCallback) {
 
   $<HTMLInputElement>('#image').single().value = record.group.image;
   await adaptDescriptions(record, callback);
+}
+
+async function adaptUniversal(
+  site: NamedSite,
+  record: Record,
+  callback: AdaptCallback,
+) {
+  const artists = Object.keys(record.group)
+    .filter((k) => typia.is<keyof RecordPersonnel>(k))
+    .flatMap((role) =>
+      record.group[role].map((artist): [string, keyof RecordPersonnel] => [
+        l10n.format(artist, site.lang),
+        role,
+      ]),
+    );
+  adaptNames(l10n.format(record.group.name, site.lang), artists);
+
+  $<HTMLInputElement>('#year').single().value = record.group.year.toString();
+
+  $<HTMLInputElement>('#remaster_year').single().value =
+    record.item.year?.toString() ?? '';
+  $<HTMLInputElement>('#remaster_title').single().value =
+    record.item.name ?? '';
+  $<HTMLInputElement>('#remaster_record_label').single().value =
+    record.item.label ?? '';
+  $<HTMLInputElement>('#remaster_catalogue_number').single().value =
+    record.item.catalogue ?? '';
+
+  await adaptUniversalCore(record, callback);
 }
 
 function _adaptReleaseType(
@@ -478,47 +557,27 @@ function _adaptReleaseType(
   select.value = mapped;
 }
 
-async function adaptGazelle(
-  site: keyof typeof sites.gazelle,
-  json_url: string,
-) {
-  const json: TorrentResponse = await _getJson(json_url, 'json');
-  if (json.status === 'failure') {
-    throw json;
-  }
+async function adaptGazelle(site: NamedSite, gazelle: TorrentEntry) {
+  const group = gazelle.group;
+  const release = gazelle.torrent;
 
-  const group = json.response.group;
-  const release = json.response.torrent;
+  const artists = Object.entries(group.musicInfo).flatMap(([role, artists]) => {
+    return artists.map(
+      (artist) => [artist.name, role] as [string, keyof Group['musicInfo']],
+    );
+  });
 
-  const artist_add = $('#artistfields .brackets.icon_add').single();
-  Object.entries(group.musicInfo)
-    .flatMap(([role, artists]) => {
-      return artists.map(
-        (artist) => [role, artist] as [keyof typeof group.musicInfo, Artist],
-      );
-    })
-    .forEach(([role, artist], i) => {
-      let input: HTMLInputElement;
-      if (i === 0) {
-        input = $<HTMLInputElement>('#artist').single();
-      } else {
-        artist_add.click();
-        input = $<HTMLInputElement>(`#artist_${i}`).single();
-      }
-      input.value = artist.name;
-      (input.nextElementSibling as HTMLSelectElement).value =
-        _adaptArtistRole(role);
-    });
+  adaptNames(group.name, artists);
 
-  if (typia.is<keyof typeof sites.gazelle>(site)) {
+  if (typia.is<keyof typeof sites.gazelle>(site.name)) {
     _adaptReleaseType(
       $<HTMLSelectElement>('#releasetype').single(),
       group.releaseType.toString(),
-      site,
+      site.name,
       'Redacted',
     );
   } else {
-    console.warn(site);
+    console.warn(site.name);
   }
 
   if (release.scene) {
@@ -528,19 +587,23 @@ async function adaptGazelle(
   $<HTMLInputElement>('#tags').single().value = group.tags.join(',');
 }
 
-async function adaptLogs(logs: LogCollection, name: string) {
+async function adaptLogs(logs: LogCollection, name: Biscriptal | string) {
   const log_input = $<HTMLInputElement>(
     '#file[name^=logfiles], #logfile_1[name^=logfile]',
   ).single();
-  log_input.files = toDataTransfer(log.toFile(logs, name)).files;
+  log_input.files = toDataTransfer(
+    log.toFile(logs, l10n.select(name, 'native')),
+  ).files;
 }
 
 export {
   adaptAuto,
   adaptDescriptions,
   adaptUniversal,
+  adaptUniversalCore,
   adaptGazelle,
   adaptLogs,
+  getGazelle,
 };
 export type { Artist, Group, Torrent, TorrentResponse };
 export default function (framework: typeof sites.gazelle) {

@@ -1,10 +1,11 @@
 import base64url, { marshal, unmarshal } from './common/base64url';
 import { toDataTransfer, xmlHttpRequest } from './common/html';
+import l10n from './common/l10n';
 import { _throw } from './common/throw';
+import { Payload } from './common/types';
 import sites, { parseSites } from './sites';
-import { Payload } from './sites/types';
 
-const [fw, st, site, cat] = parseSites(location);
+const [fw, site, cat] = parseSites(location);
 
 declare global {
   interface JQuery<TElement = HTMLElement> {
@@ -54,7 +55,7 @@ if (cat === 'validate') {
 
   if (cat === 'source') {
     if (site.extract) {
-      await site.extract([st, site], async (container, payload) => {
+      await site.extract(site, async (container, payload) => {
         console.debug(payload);
 
         const params = new URLSearchParams();
@@ -132,7 +133,7 @@ if (cat === 'validate') {
         return toDataTransfer(
           new File(
             [event.response],
-            `${encodeURIComponent(record.group.name)}.torrent`,
+            `${encodeURIComponent(l10n.select(record.group.name, 'native'))}.torrent`,
             { type: 'application/x-bittorrent' },
           ),
         );
@@ -153,23 +154,27 @@ if (cat === 'validate') {
             break;
         }
 
-        await site.adapt(payload, async (container, input, selections) => {
-          selections = selections.filter((s) => s);
-          if (selections.length >= 1) {
-            input.single().value = selections[0];
-            if (selections.length > 1) {
-              const anchor = $('<a>')
-                .appendTo(container.append($('<br>')))
-                .text('Toggle')
-                .attr('href', '#_ostrich')
-                .single();
-              anchor.onclick = () => {
-                selections.push(selections.shift()!);
-                input.single().value = selections[0];
-              };
+        await site.adapt(
+          site,
+          payload,
+          async (container, input, selections) => {
+            selections = selections.filter((s) => s);
+            if (selections.length >= 1) {
+              input.single().value = selections[0];
+              if (selections.length > 1) {
+                const anchor = $('<a>')
+                  .appendTo(container.append($('<br>')))
+                  .text('Toggle')
+                  .attr('href', '#_ostrich')
+                  .single();
+                anchor.onclick = () => {
+                  selections.push(selections.shift()!);
+                  input.single().value = selections[0];
+                };
+              }
             }
-          }
-        });
+          },
+        );
       }
     }
   }

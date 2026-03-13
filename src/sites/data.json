@@ -50,6 +50,26 @@
           }
         }
       },
+      "JPopsuki": {
+        "hostname": "jpopsuki.eu",
+        "selects": {
+          "releaseType": {
+            "Album": "Album",
+            "Single": "Single",
+            "PV": "PV",
+            "DVD": "DVD",
+            "TV-Music": "TV-Music",
+            "TV-Variety": "TV-Variety",
+            "TV-Drama": "TV-Drama",
+            "Fansubs": "Fansubs",
+            "Pictures": "Pictures",
+            "Misc": "Misc"
+          }
+        },
+        "actions": {
+          "log": null
+        }
+      },
       "OPS": {
         "hostname": "orpheus.network",
         "selects": {

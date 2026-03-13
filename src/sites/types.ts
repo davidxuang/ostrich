@@ -1,64 +1,5 @@
-import { BBNode } from '../common/bbcode';
+import { Payload } from '../common/types';
 
-type LogCollection =
-  | {
-      plain: string[];
-      encoded?: undefined;
-      recovered?: boolean;
-      score: number;
-    }
-  | {
-      plain?: undefined;
-      encoded: string[]; // base64url
-      recovered?: boolean;
-      score: number;
-    };
-
-type Description =
-  | {
-      description: string;
-      description_tree?: BBNode[];
-    }
-  | {
-      description?: string;
-      description_tree: BBNode[];
-    };
-
-type Record = {
-  site: string;
-  group: {
-    name: string;
-    artists: string[];
-    guests: string[];
-    composers: string[];
-    conductor: string[];
-    producer: string[];
-    dj: string[];
-    remixer: string[];
-    label: string;
-    catalogue: string;
-    year: number;
-    image: string;
-  } & Description;
-  item: {
-    name?: string;
-    label?: string;
-    catalogue?: string;
-    year?: number;
-    media: string;
-    encoding: string;
-    format: string;
-    scene: boolean;
-    uploaded_by: string;
-    logs?: LogCollection;
-  } & Description;
-};
-
-interface Payload {
-  torrent: string;
-  record: Record;
-  [key: string]: any;
-}
 type ExtractCallback = (container: JQuery, payload: Payload) => Promise<void>;
 type ValidateCallback = (container: JQuery, selector: string) => Promise<void>;
 type AdaptCallback = (
@@ -67,13 +8,18 @@ type AdaptCallback = (
   selections: string[],
 ) => Promise<void>;
 
-type SiteCore = {
+type SiteCore<K = string> = {
   hostname: string;
   selects?: { [map: string]: { [key: string]: string } };
+  lang?: 'latin' | 'native' | 'cjk' | 'zh' | string;
 
-  extract?: (site: [string, Site], callback: ExtractCallback) => Promise<void>;
+  extract?: (site: NamedSite<K>, callback: ExtractCallback) => Promise<void>;
   validate?: (callback: ValidateCallback) => Promise<void>;
-  adapt?: (payload: Payload, callback: AdaptCallback) => Promise<void>;
+  adapt?: (
+    site: NamedSite<K>,
+    payload: Payload,
+    callback: AdaptCallback,
+  ) => Promise<void>;
 };
 
 type SiteInclues = {
@@ -89,30 +35,28 @@ type SiteExclude = {
 type PartialSiteEntries = {
   include?: Partial<SiteInclues>;
   exclude?: Partial<SiteExclude>;
-  actions?: { [action: string]: string };
+  actions?: { [action: string]: string | null };
 };
 type SiteEntries = {
   include: SiteInclues;
   exclude: SiteExclude;
-  actions?: { [action: string]: string };
+  actions?: { [action: string]: string | null };
 };
 
-type PartialSite = SiteCore & PartialSiteEntries;
-type Site = SiteCore & SiteEntries;
+type PartialSite<K = string> = SiteCore<K> & PartialSiteEntries;
+type Site<K = string> = SiteCore<K> & SiteEntries;
+type NamedSite<K = string> = Site<K> & { name: string };
 
 type FrameworkMap = { [fw: string]: { [st: string]: Site } };
 
 export type {
-  LogCollection,
-  Description,
-  Record,
-  Payload,
   ValidateCallback,
   ExtractCallback,
   AdaptCallback,
+  SiteIncludeTypes,
   SiteEntries,
   PartialSite,
   Site,
-  SiteIncludeTypes,
+  NamedSite,
   FrameworkMap,
 };
