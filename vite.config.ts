@@ -1,4 +1,4 @@
-import typescript from 'rollup-plugin-typescript2';
+import UnpluginTypia from '@typia/unplugin/vite';
 import { defineConfig } from 'vite';
 import monkey from 'vite-plugin-monkey';
 import sites from './src/sites/data';
@@ -8,10 +8,7 @@ export default defineConfig({
     target: 'es2020',
   },
   plugins: [
-    {
-      enforce: 'pre',
-      ...typescript(),
-    },
+    UnpluginTypia(),
     monkey({
       entry: 'src/main.ts',
       build: {
