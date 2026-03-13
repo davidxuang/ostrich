@@ -2,8 +2,9 @@
 
 | Framework | Site     | Source | Target |
 | --------- | -------- | :----: | :----: |
-| Gazelle   | DIC      |   ✅    |   ✅    |
-|           | OPS      |   ✅    |   ✅    |
-|           | Redacted |   ✅    |   ✅    |
-| NexusPHP  | OpenCD   |        |   ✅    |
-|           | TJUPT    |        |   ✅    |
+| Gazelle   | DIC      |   ✅   |   ✅   |
+|           | JPopsuki |   ✅   |   ✅   |
+|           | OPS      |   ✅   |   ✅   |
+|           | Redacted |   ✅   |   ✅   |
+| NexusPHP  | OpenCD   |        |   ✅   |
+|           | TJUPT    |        |   ✅   |
