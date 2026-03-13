@@ -369,7 +369,10 @@ async function extract(site: NamedSite, callback: ExtractCallback) {
 }
 
 async function validate(callback: ValidateCallback) {
-  await callback($('#upload_logs .label'), '#file[name^=logfiles]');
+  await callback(
+    $('#upload_logs .label'),
+    '#file[name^=logfiles], #logfile_1[name^=logfile]',
+  );
   const form = $('#dynamic_form')[0];
   if (form) {
     onDescendantAdded($(form).single(), false, async (node) => {
@@ -506,7 +509,10 @@ async function adaptUniversalCore(record: Record, callback: AdaptCallback) {
     $<HTMLInputElement>('#other_bitrate').single().value = record.item.encoding;
   }
 
-  trySelect($<HTMLSelectElement>('#media').single(), record.item.media);
+  trySelect(
+    $<HTMLSelectElement>('#media, select[name=media]').single(),
+    record.item.media,
+  );
 
   $<HTMLInputElement>('#image').single().value = record.group.image;
   await adaptDescriptions(record, callback);
