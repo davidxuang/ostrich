@@ -378,7 +378,10 @@ async function validate(callback: ValidateCallback) {
     onDescendantAdded($(form).single(), false, async (node) => {
       const label = $(node).find('#upload_logs .label');
       if (label.length) {
-        await callback(label, '#file[name^=logfiles]');
+        await callback(
+          label,
+          '#file[name^=logfiles], #logfile_1[name^=logfile]',
+        );
       }
     });
   }
