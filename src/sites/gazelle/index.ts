@@ -30,6 +30,7 @@ import {
 } from '../types';
 import bbcode from './bbcode';
 import dic from './dic';
+import jpopsuki from './jpopsuki';
 import ops from './ops';
 import redacted from './redacted';
 
@@ -615,6 +616,8 @@ export default function (framework: typeof sites.gazelle) {
     switch (st) {
       case 'DIC':
         return dic(site);
+      case 'JPopsuki':
+        return jpopsuki(site);
       case 'OPS':
         return ops(site);
       case 'Redacted':
