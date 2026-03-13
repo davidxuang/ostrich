@@ -48,7 +48,7 @@ export default function (def: PartialSite) {
             .appendTo(links_container);
 
           const h2 = $('h2').single();
-          const h3 = $('h3').single();
+          const h3 = $('h3').get(0)!;
           const header_info = header_buttons[0].nextElementSibling;
 
           const type =
@@ -57,12 +57,11 @@ export default function (def: PartialSite) {
           const [, latin_title = '', date = ''] =
             h2.lastChild?.textContent
               ?.trim()
-              ?.match(/^-\s*(.+?)\s*(\[[\d.]+\])$/) ?? [];
+              ?.match(/^-\s*(.+?)\s*\[([\d.]+)\]$/) ?? [];
 
           let native_artist = h3.querySelector('a')?.textContent?.trim();
-          let native_title = h3.lastChild?.textContent
-            ?.trim()
-            .match(/^-\s*(.+?)\s*(\[[\d.]+\])$/)?.[1];
+          let [, native_title = undefined] =
+            h3.lastChild?.textContent?.trim().match(/^-\s*(.+?)\s*\)$/) ?? [];
 
           if (native_artist == latin_artist) native_artist = undefined;
           if (native_title == latin_title) native_title = undefined;
@@ -90,12 +89,13 @@ export default function (def: PartialSite) {
                     }
                   : latin_artist,
               ],
-              guests: [
-                ...$<HTMLUListElement>(
-                  '.stats.nobullet:has(+ form input[value=add_contrib])',
-                ).single().children,
-              ]
-                .map((li) => $(li).find('a').get(0)?.textContent)
+              guests: $<HTMLUListElement>(
+                '.box:has(.head:contains("Contributing Artists")) .stats.nobullet',
+              )
+                .first()
+                .find<HTMLAnchorElement>('li a:first-of-type')
+                .toArray()
+                .map((a) => a.textContent)
                 .filter((t) => t !== undefined),
               composers: [],
               conductor: [],
@@ -105,7 +105,8 @@ export default function (def: PartialSite) {
               label: '',
               catalogue: '',
               year: parseInt(date.slice(0, 4)),
-              image: $<HTMLAnchorElement>('.sidebar a:has(img)').single().href,
+              image:
+                $<HTMLAnchorElement>('.sidebar a:has(img)').get(0)?.href ?? '',
               description_tree: bbcode.fromHTML(
                 $('.torrent_table + .box .body').single(),
                 new URL(location.href),

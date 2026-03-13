@@ -13,7 +13,7 @@ import { PartialSite } from '../types';
 import bbcode from './bbcode';
 
 export default function (def: PartialSite) {
-  def.lang = 'zh';
+  def.lang = 'native';
 
   def.validate = async (callback) => {
     await callback($('.rowhead[msg^=NFO]'), 'input[name^=nfo1]');
