@@ -1,7 +1,7 @@
 {
   "name": "ostrich",
   "private": true,
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Reposting music torrents on sites built on Gazelle and other frameworks",
   "homepage": "https://github.com/davidxuang/ostrich",
   "type": "module",
@@ -36,6 +36,9 @@
   "pnpm": {
     "patchedDependencies": {
       "brotli-wasm@3.0.0": "patches/brotli-wasm@3.0.0.patch"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

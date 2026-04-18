@@ -1,6 +1,6 @@
 import { trySelect } from '../../common/html';
 import { PartialSite } from '../types';
-import { adaptUniversalCore, getGazelle } from '.';
+import { adaptGenericCore, getGazelle } from '.';
 import bbcode from './bbcode';
 
 export default function (def: PartialSite) {
@@ -174,7 +174,7 @@ export default function (def: PartialSite) {
         record.item.name ?? '';
     }
 
-    await adaptUniversalCore(record, callback);
+    await adaptGenericCore(record, callback);
 
     if (gazelle) {
       $<HTMLInputElement>('#tags').single().value =

@@ -5,7 +5,7 @@
     "module": "ES2022",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["jquery"],
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "strict": true,
     "sourceMap": true,
     "resolveJsonModule": true,
@@ -15,7 +15,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
   },
   "include": ["src"]
 }

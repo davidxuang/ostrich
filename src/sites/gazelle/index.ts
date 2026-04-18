@@ -418,7 +418,11 @@ async function getGazelle(site: NamedSite, payload: Payload) {
   return undefined;
 }
 
-async function adaptAuto(gazelle: TorrentEntry) {
+async function adaptAuto(
+  gazelle: TorrentEntry,
+  record: Record,
+  callback: AdaptCallback,
+) {
   const json_input = $<HTMLInputElement>('#torrent-json-file').single();
   const response: TorrentResponse = {
     status: 'success',
@@ -441,6 +445,10 @@ async function adaptAuto(gazelle: TorrentEntry) {
     undefined,
     json_input,
   );
+
+  // avoid racing
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await adaptDescriptions(record, callback);
 }
 
 function _adaptArtistRole(role: Role) {
@@ -479,9 +487,7 @@ async function adaptDescriptions(record: Record, callback: AdaptCallback) {
   );
 }
 
-function adaptNames(name: string, artists: [string, Role][]) {
-  $<HTMLInputElement>('#title').single().value = name;
-
+function adaptArtists(artists: [string, Role][]) {
   const [artist_add, artist_rm] = $('#artistfields .brackets').toArray();
   while ($<HTMLInputElement>(`#artist_1`).length > 0) {
     artist_rm.click();
@@ -500,7 +506,7 @@ function adaptNames(name: string, artists: [string, Role][]) {
   });
 }
 
-async function adaptUniversalCore(record: Record, callback: AdaptCallback) {
+async function adaptGenericCore(record: Record, callback: AdaptCallback) {
   const format_select = $<HTMLSelectElement>('#format').single();
   trySelect(format_select, record.item.format);
   $(format_select).trigger('change');
@@ -521,11 +527,16 @@ async function adaptUniversalCore(record: Record, callback: AdaptCallback) {
   await adaptDescriptions(record, callback);
 }
 
-async function adaptUniversal(
+async function adaptGeneric(
   site: NamedSite,
   record: Record,
   callback: AdaptCallback,
 ) {
+  $<HTMLInputElement>('#title').single().value = l10n.format(
+    record.group.name,
+    site.lang,
+  );
+
   const artists = Object.keys(record.group)
     .filter((k) => typia.is<keyof RecordPersonnel>(k))
     .flatMap((role) =>
@@ -534,7 +545,7 @@ async function adaptUniversal(
         role,
       ]),
     );
-  adaptNames(l10n.format(record.group.name, site.lang), artists);
+  adaptArtists(artists);
 
   $<HTMLInputElement>('#year').single().value = record.group.year.toString();
 
@@ -547,7 +558,7 @@ async function adaptUniversal(
   $<HTMLInputElement>('#remaster_catalogue_number').single().value =
     record.item.catalogue ?? '';
 
-  await adaptUniversalCore(record, callback);
+  await adaptGenericCore(record, callback);
 }
 
 function _adaptReleaseType(
@@ -576,8 +587,7 @@ async function adaptGazelle(site: NamedSite, gazelle: TorrentEntry) {
       (artist) => [artist.name, role] as [string, keyof Group['musicInfo']],
     );
   });
-
-  adaptNames(group.name, artists);
+  adaptArtists(artists);
 
   if (typia.is<keyof typeof sites.gazelle>(site.name)) {
     _adaptReleaseType(
@@ -609,8 +619,8 @@ async function adaptLogs(logs: LogCollection, name: Biscriptal | string) {
 export {
   adaptAuto,
   adaptDescriptions,
-  adaptUniversal,
-  adaptUniversalCore,
+  adaptGeneric,
+  adaptGenericCore,
   adaptGazelle,
   adaptLogs,
   getGazelle,

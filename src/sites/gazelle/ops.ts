@@ -1,5 +1,5 @@
 import { PartialSite } from '../types';
-import { adaptUniversal, adaptAuto, adaptLogs, getGazelle } from '.';
+import { adaptGeneric, adaptAuto, adaptLogs, getGazelle } from '.';
 
 export default function (def: PartialSite) {
   def.adapt = async (site, payload, callback) => {
@@ -7,9 +7,9 @@ export default function (def: PartialSite) {
     const gazelle = await getGazelle(site, payload);
 
     if (gazelle) {
-      await adaptAuto(gazelle);
+      await adaptAuto(gazelle, payload.record, callback);
     } else {
-      await adaptUniversal(site, payload.record, callback);
+      await adaptGeneric(site, payload.record, callback);
     }
 
     if (record.item.logs) {
