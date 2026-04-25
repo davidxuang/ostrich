@@ -423,6 +423,16 @@ async function adaptAuto(
   record: Record,
   callback: AdaptCallback,
 ) {
+  // patch `remastered` for OPS sources
+  if (
+    gazelle.torrent.remasterTitle ||
+    gazelle.torrent.remasterYear ||
+    gazelle.torrent.remasterRecordLabel ||
+    gazelle.torrent.remasterCatalogueNumber
+  ) {
+    gazelle.torrent.remastered = true;
+  }
+
   const json_input = $<HTMLInputElement>('#torrent-json-file').single();
   const response: TorrentResponse = {
     status: 'success',
