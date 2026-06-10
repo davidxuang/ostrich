@@ -5,7 +5,7 @@ import sites from './src/sites/data';
 
 export default defineConfig({
   build: {
-    target: 'es2020',
+    target: 'es2022',
   },
   plugins: [
     UnpluginTypia(),
