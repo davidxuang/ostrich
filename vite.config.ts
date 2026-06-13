@@ -1,6 +1,7 @@
 import UnpluginTypia from '@typia/unplugin/vite';
 import { defineConfig } from 'vite';
 import monkey from 'vite-plugin-monkey';
+import _brotli_wasm from './node_modules/brotli-wasm/package.json' with { type: 'json' };
 import sites from './src/sites/data';
 
 export default defineConfig({
@@ -35,8 +36,7 @@ export default defineConfig({
           ),
         ],
         resource: {
-          brotli_wasm_bg:
-            'https://cdn.jsdelivr.net/npm/brotli-wasm@3/pkg.web/brotli_wasm_bg.wasm',
+          brotli_wasm_bg: `https://cdn.jsdelivr.net/npm/brotli-wasm@${_brotli_wasm.version}/pkg.web/brotli_wasm_bg.wasm`,
         },
         updateURL:
           'https://github.com/davidxuang/ostrich/releases/latest/download/ostrich.meta.js',
