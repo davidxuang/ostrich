@@ -133,26 +133,42 @@ if (cat === 'validate') {
         return toDataTransfer(
           new File(
             [event.response],
-            `${encodeURIComponent(l10n.select(record.group.name, 'native'))}.torrent`,
+            `${l10n.select(record.group.name, 'native')}.torrent`,
             { type: 'application/x-bittorrent' },
           ),
         );
       });
 
       if (site.adapt) {
-        switch (fw) {
-          case 'gazelle':
-            await torrent_task.then((data) => {
-              $<HTMLInputElement>('#file[name=file_input]').single().files =
-                data.files;
-            });
-            break;
-          case 'nexusphp':
-            await torrent_task.then((data) => {
-              $<HTMLInputElement>('#torrent').single().files = data.files;
-            });
-            break;
-        }
+        const input = (() => {
+          switch (fw) {
+            case 'gazelle':
+              return $<HTMLInputElement>('#file[name=file_input]').single();
+            case 'nexusphp':
+              return $<HTMLInputElement>('#torrent').single();
+            default:
+              throw new Error(`Unsupported framework: ${fw}`);
+          }
+        })();
+        // allow to download the current file
+        input.addEventListener('contextmenu', (event) => {
+          event.preventDefault();
+
+          for (const file of input.files ?? []) {
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = URL.createObjectURL(file);
+            a.download = file.name;
+            input.insertAdjacentElement('afterend', a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(a.href);
+          }
+        });
+
+        await torrent_task.then((data) => {
+          input.files = data.files;
+        });
 
         await site.adapt(
           site,
