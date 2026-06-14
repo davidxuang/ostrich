@@ -1,3 +1,4 @@
+import sanitize from 'sanitize-filename';
 import base64url, { marshal, unmarshal } from './common/base64url';
 import { toDataTransfer, xmlHttpRequest } from './common/html';
 import l10n from './common/l10n';
@@ -133,7 +134,7 @@ if (cat === 'validate') {
         return toDataTransfer(
           new File(
             [event.response],
-            `${l10n.select(record.group.name, 'native')}.torrent`,
+            sanitize(`${l10n.select(record.group.name, 'native')}.torrent`),
             { type: 'application/x-bittorrent' },
           ),
         );

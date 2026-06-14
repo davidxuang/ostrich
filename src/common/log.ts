@@ -1,3 +1,4 @@
+import sanitize from 'sanitize-filename';
 import base64url from './base64url';
 import { LogCollection } from './types';
 
@@ -26,7 +27,11 @@ function toFile(logs: LogCollection, title: string) {
         (log, l) =>
           new File(
             [base64url.decodeBytes(log)],
-            logs.encoded.length > 1 ? `${title}.${l + 1}.log` : `${title}.log`,
+            sanitize(
+              logs.encoded.length > 1
+                ? `${title}.${l + 1}.log`
+                : `${title}.log`,
+            ),
             {
               type: 'text/plain',
             },
@@ -34,8 +39,9 @@ function toFile(logs: LogCollection, title: string) {
       )
     : logs.plain.map((log, l) => {
         log = log.trim();
-        const name =
-          logs.plain.length > 1 ? `${title}.${l + 1}.log` : `${title}.log`;
+        const name = sanitize(
+          logs.plain.length > 1 ? `${title}.${l + 1}.log` : `${title}.log`,
+        );
 
         if (log.startsWith('Exact Audio Copy')) {
           const array = new Uint16Array(log.length);
