@@ -4,6 +4,7 @@ import base64url, { marshal, unmarshal } from './common/base64url';
 import { toDataTransfer } from './common/html';
 import l10n from './common/l10n';
 import { _throw } from './common/throw';
+import * as torrent from './common/torrent';
 import { Payload } from './common/types';
 import sites, { parseSites } from './sites';
 
@@ -135,6 +136,8 @@ if (cat === 'validate') {
             responseType: 'arraybuffer',
           })
         ).response;
+        buffer = (await torrent.patch(new Uint8Array(buffer), site.name))
+          .buffer as ArrayBuffer;
         return toDataTransfer(
           new File(
             [buffer],

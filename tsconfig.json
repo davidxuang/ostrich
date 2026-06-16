@@ -6,6 +6,8 @@
     "types": ["jquery"],
     "moduleResolution": "bundler",
     "strict": true,
+    "allowJs": true,
+    "maxNodeModuleJsDepth": 3,
     "sourceMap": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
