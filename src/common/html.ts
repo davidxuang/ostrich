@@ -1,48 +1,3 @@
-import {
-  GM_xmlhttpRequest,
-  GmResponseTypeMap,
-  GmXmlhttpRequestOption,
-} from '$';
-
-type ResponseTypes = keyof {
-  text: string;
-  json: any;
-  arraybuffer: ArrayBuffer;
-  blob: Blob;
-  document: Document;
-  stream: ReadableStream<Uint8Array>;
-};
-
-function xmlHttpRequest<
-  TContext extends keyof GmResponseTypeMap,
-  TResponse extends ResponseTypes = 'text',
->(details: GmXmlhttpRequestOption<TContext, TResponse>) {
-  return new Promise<
-    Parameters<
-      Exclude<GmXmlhttpRequestOption<TContext, TResponse>['onload'], undefined>
-    >[0]
-  >((resolve, reject) => {
-    GM_xmlhttpRequest<TContext, TResponse>({
-      ...details,
-      onabort() {
-        reject('Aborted');
-      },
-      onload(event) {
-        if (event.status !== 200) {
-          reject(event.statusText);
-        }
-        resolve(event);
-      },
-      onerror(event) {
-        reject(event);
-      },
-      ontimeout() {
-        reject('Timeout');
-      },
-    });
-  });
-}
-
 function parseHeaders(value: string) {
   return Object.fromEntries(
     value.split('\r\n').map((line) => {
@@ -161,7 +116,6 @@ function trySelect(select: HTMLSelectElement, name: string) {
 }
 
 export {
-  xmlHttpRequest,
   parseHeaders,
   toDataTransfer,
   unescapeHtml,

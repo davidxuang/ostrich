@@ -1,10 +1,10 @@
+import { GM } from '$';
 import { dumpDescriptions } from '..';
 import {
   nextMutation,
   parseHeaders,
   toDataTransfer,
   trySelect,
-  xmlHttpRequest,
 } from '../../common/html';
 import l10n from '../../common/l10n';
 import log from '../../common/log';
@@ -21,7 +21,7 @@ export default function (def: PartialSite) {
 
   def.adapt = async (site, payload, callback) => {
     const record = payload.record;
-    const cover_task = xmlHttpRequest({
+    const cover_task = GM.xmlHttpRequest({
       method: 'GET',
       url: record.group.image,
       responseType: 'arraybuffer',

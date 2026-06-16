@@ -1,3 +1,4 @@
+import { GM } from '$';
 import typia from 'typia';
 import { dumpDescriptions } from '..';
 import base64url from '../../common/base64url';
@@ -7,7 +8,6 @@ import {
   toDataTransfer,
   trySelect,
   unescapeHtml,
-  xmlHttpRequest,
   onDescendantAdded,
 } from '../../common/html';
 import l10n from '../../common/l10n';
@@ -290,7 +290,7 @@ async function extract(site: NamedSite, callback: ExtractCallback) {
           `/ajax.php?action=torrent&id=${torrent_id}`,
           location.href,
         ).toString();
-        const record = await xmlHttpRequest({
+        const record = await GM.xmlHttpRequest({
           method: 'GET',
           url: gazelle_url,
           responseType: 'json',
@@ -302,7 +302,7 @@ async function extract(site: NamedSite, callback: ExtractCallback) {
 
           let logs: LogCollection | undefined;
           if (r.response.torrent.hasLog) {
-            logs = await xmlHttpRequest({
+            logs = await GM.xmlHttpRequest({
               method: 'GET',
               url: `${site.exclude.download}?action=${
                 site.actions?.log || _throw(site)
@@ -315,7 +315,7 @@ async function extract(site: NamedSite, callback: ExtractCallback) {
                 return {
                   encoded: await Promise.all(
                     sections.toArray().map(async (section) => {
-                      const event = await xmlHttpRequest({
+                      const event = await GM.xmlHttpRequest({
                         method: 'GET',
                         url: new URL(
                           (
@@ -391,7 +391,7 @@ async function getJson<T extends 'arraybuffer' | 'json'>(
   gazelle: string,
   type: T,
 ) {
-  return xmlHttpRequest({
+  return GM.xmlHttpRequest({
     method: 'GET',
     url: gazelle,
     responseType: type,

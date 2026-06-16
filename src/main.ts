@@ -1,6 +1,7 @@
+import { GM } from '$';
 import sanitize from 'sanitize-filename';
 import base64url, { marshal, unmarshal } from './common/base64url';
-import { toDataTransfer, xmlHttpRequest } from './common/html';
+import { toDataTransfer } from './common/html';
 import l10n from './common/l10n';
 import { _throw } from './common/throw';
 import { Payload } from './common/types';
@@ -126,19 +127,22 @@ if (cat === 'validate') {
       const record = payload.record;
       console.debug(payload);
 
-      const torrent_task = xmlHttpRequest({
-        method: 'GET',
-        url: payload.torrent,
-        responseType: 'arraybuffer',
-      }).then((event) => {
+      const torrent_task = (async () => {
+        let buffer = (
+          await GM.xmlHttpRequest({
+            method: 'GET',
+            url: payload.torrent,
+            responseType: 'arraybuffer',
+          })
+        ).response;
         return toDataTransfer(
           new File(
-            [event.response],
+            [buffer],
             sanitize(`${l10n.select(record.group.name, 'native')}.torrent`),
             { type: 'application/x-bittorrent' },
           ),
         );
-      });
+      })();
 
       if (site.adapt) {
         const input = (() => {
