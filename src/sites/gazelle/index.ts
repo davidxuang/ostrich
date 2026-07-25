@@ -519,12 +519,10 @@ function adaptArtists(artists: [string, Role][]) {
 async function adaptGenericCore(record: Record, callback: AdaptCallback) {
   const format_select = $<HTMLSelectElement>('#format').single();
   trySelect(format_select, record.item.format);
-  $(format_select).trigger('change');
 
   const encoding_select = $<HTMLSelectElement>('#bitrate').single();
   if (!trySelect(encoding_select, record.item.encoding)) {
     trySelect(encoding_select, 'Other');
-    $(encoding_select).trigger('change');
     $<HTMLInputElement>('#other_bitrate').single().value = record.item.encoding;
   }
 

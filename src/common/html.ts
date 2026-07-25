@@ -111,7 +111,8 @@ function trySelect(select: HTMLSelectElement, name: string) {
         (p.name?.indexOf(n) ?? NaN) >= 0 ||
         (p.name && (n?.indexOf(p.name) ?? NaN) >= 0),
     ),
-  );
+  );4
+  select.dispatchEvent(new Event('change'));
   return seq.length === 1 && (select.value = seq.at(0)!.key);
 }
 
