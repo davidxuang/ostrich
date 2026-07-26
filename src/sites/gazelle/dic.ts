@@ -19,6 +19,8 @@ export default function (def: PartialSite) {
       gazelle.group.wikiBody = '';
       gazelle.torrent.description = '';
       await adaptAuto(gazelle, payload.record, callback);
+      // mitigation
+      $<HTMLSelectElement>('#bitrate').single().dispatchEvent(new Event('change'));
       // override descriptions
       await adaptDescriptions(record, callback);
     } else {
