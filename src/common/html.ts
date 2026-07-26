@@ -82,7 +82,11 @@ function trySelect(select: HTMLSelectElement, name: string) {
     .filter((p) => p.name);
   let seq = options.filter((p) => p.name === name);
   if (seq.length) {
-    return seq.length === 1 && (select.value = seq.at(0)!.key);
+    return (
+      seq.length === 1 &&
+      (select.value = seq.at(0)!.key) &&
+      select.dispatchEvent(new Event('change'))
+    );
   }
   seq = options.filter(
     (p) =>
@@ -90,7 +94,11 @@ function trySelect(select: HTMLSelectElement, name: string) {
       (p.name && (name?.indexOf(p.name) ?? NaN) >= 0),
   );
   if (seq.length) {
-    return seq.length === 1 && (select.value = seq.at(0)!.key);
+    return (
+      seq.length === 1 &&
+      (select.value = seq.at(0)!.key) &&
+      select.dispatchEvent(new Event('change'))
+    );
   }
   const match = name.match(_reSplit);
   const names = match ? [match[1], match[2]] : [name];
@@ -111,9 +119,13 @@ function trySelect(select: HTMLSelectElement, name: string) {
         (p.name?.indexOf(n) ?? NaN) >= 0 ||
         (p.name && (n?.indexOf(p.name) ?? NaN) >= 0),
     ),
-  );4
-  select.dispatchEvent(new Event('change'));
-  return seq.length === 1 && (select.value = seq.at(0)!.key);
+  );
+  4;
+  return (
+    seq.length === 1 &&
+    (select.value = seq.at(0)!.key) &&
+    select.dispatchEvent(new Event('change'))
+  );
 }
 
 export {
